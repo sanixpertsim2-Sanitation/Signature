@@ -273,6 +273,7 @@
     const DISPLAY_HEIGHT = 253;
     const BASE_TO_DISPLAY = DISPLAY_WIDTH / BASE_WIDTH;
     const WEBSITE = 'https://www.SaniXperts.ca';
+    const TRANSPARENT_PIXEL = 'https://sanixpertsim2-sanitation.github.io/Signature/transparent.png';
 
     const templates = {
       vince: {
@@ -377,55 +378,60 @@
     };
 
     const uniqueSorted = values => [...new Set(values)].sort((a, b) => a - b);
-    const cropUrl = (src, x, y, width, height, outputWidth) => {
-      const transform = `c_crop,x_${x},y_${y},w_${width},h_${height}/c_scale,w_${outputWidth}`;
+    const scaledImageUrl = (src, outputWidth) => {
+      const transform = `c_scale,w_${outputWidth}`;
       return src.replace('/image/upload/', `/image/upload/${transform}/`);
     };
-    const linkForCell = (template, x1, y1, x2, y2) => {
-      const cx = (x1 + x2) / 2;
+    const linksForBand = (template, y1, y2) => {
       const cy = (y1 + y2) / 2;
-      return template.areas.find(area => (
-        cx >= area.rect[0] && cx <= area.rect[2] &&
+      return template.areas.filter(area => (
         cy >= area.rect[1] && cy <= area.rect[3]
-      ));
+      )).sort((a, b) => a.rect[0] - b.rect[0]);
     };
 
     const renderSlicedSignature = (template, width) => {
       const imageScale = width / BASE_WIDTH;
       const height = Math.round(BASE_HEIGHT * imageScale);
-      const contactAreas = template.areas.filter(area => !area.label.toLowerCase().includes('sanixperts website'));
-      const minContactX = Math.min(...contactAreas.map(area => area.rect[0]));
-      const maxContactX = Math.max(...contactAreas.map(area => area.rect[2]));
-      const contactStart = Math.max(0, minContactX - 120);
-      const contactEnd = maxContactX > BASE_WIDTH * .68 ? BASE_WIDTH : Math.min(BASE_WIDTH, maxContactX + 160);
-      const yCuts = uniqueSorted([0, BASE_HEIGHT, ...contactAreas.flatMap(area => [area.rect[1], area.rect[3]])]);
-      const scaledYCuts = yCuts.map(value => Math.round(value * imageScale));
-      const imageStyle = 'display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;';
+      const fullImage = scaledImageUrl(template.src, width);
+      const yCuts = uniqueSorted([0, BASE_HEIGHT, ...template.areas.flatMap(area => [area.rect[1], area.rect[3]])]);
       const cellStyle = 'padding:0;margin:0;border:0;border-collapse:collapse;font-size:0;line-height:0;mso-line-height-rule:exactly;';
-      const leftWidth = Math.max(1, Math.round(contactStart * imageScale));
-      const rightWidth = Math.max(0, Math.round((BASE_WIDTH - contactEnd) * imageScale));
-      const scaledContactWidth = Math.max(1, width - leftWidth - rightWidth);
-      const leftSrc = cropUrl(template.src, 0, 0, contactStart, BASE_HEIGHT, leftWidth);
-      const leftImg = `<img src="${leftSrc}" width="${leftWidth}" height="${height}" alt="" style="${imageStyle}width:${leftWidth}px;height:${height}px;">`;
-      const rightSrc = rightWidth ? cropUrl(template.src, contactEnd, 0, BASE_WIDTH - contactEnd, BASE_HEIGHT, rightWidth) : '';
-      const rightImg = rightWidth ? `<img src="${rightSrc}" width="${rightWidth}" height="${height}" alt="" style="${imageStyle}width:${rightWidth}px;height:${height}px;">` : '';
-      const contactRows = [];
+      const spacerStyle = 'display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;';
+      const rows = [];
 
       for (let y = 0; y < yCuts.length - 1; y += 1) {
         const y1 = yCuts[y];
         const y2 = yCuts[y + 1];
-        const rowHeight = Math.max(1, scaledYCuts[y + 1] - scaledYCuts[y]);
-        const link = linkForCell({ areas: contactAreas }, contactStart, y1, contactEnd, y2);
-        const src = cropUrl(template.src, contactStart, y1, contactEnd - contactStart, y2 - y1, scaledContactWidth);
-        const img = `<img src="${src}" width="${scaledContactWidth}" height="${rowHeight}" alt="${link ? link.label : ''}" style="${imageStyle}width:${scaledContactWidth}px;height:${rowHeight}px;">`;
-        const content = link
-          ? `<a href="${link.href}"${link.href.startsWith('http') ? ' target="_blank"' : ''} style="display:block;border:0;text-decoration:none;">${img}</a>`
-          : img;
-        contactRows.push(`<tr style="${cellStyle}"><td width="${scaledContactWidth}" height="${rowHeight}" style="width:${scaledContactWidth}px;height:${rowHeight}px;${cellStyle}">${content}</td></tr>`);
+        const rowTop = Math.round(y1 * imageScale);
+        const rowBottom = Math.round(y2 * imageScale);
+        const rowHeight = Math.max(1, rowBottom - rowTop);
+        const rowLinks = linksForBand(template, y1, y2);
+
+        if (!rowLinks.length) {
+          rows.push(`<tr style="${cellStyle}"><td width="${width}" height="${rowHeight}" style="width:${width}px;height:${rowHeight}px;${cellStyle}"><img src="${TRANSPARENT_PIXEL}" width="${width}" height="${rowHeight}" alt="" style="${spacerStyle}width:${width}px;height:${rowHeight}px;"></td></tr>`);
+          continue;
+        }
+
+        let cursor = 0;
+        const cells = [];
+        rowLinks.forEach(link => {
+          const linkLeft = Math.max(cursor, Math.round(link.rect[0] * imageScale));
+          const linkRight = Math.min(width, Math.round(link.rect[2] * imageScale));
+          const gapWidth = Math.max(0, linkLeft - cursor);
+          const linkWidth = Math.max(1, linkRight - linkLeft);
+          if (gapWidth) {
+            cells.push(`<td width="${gapWidth}" height="${rowHeight}" style="width:${gapWidth}px;height:${rowHeight}px;${cellStyle}"><img src="${TRANSPARENT_PIXEL}" width="${gapWidth}" height="${rowHeight}" alt="" style="${spacerStyle}width:${gapWidth}px;height:${rowHeight}px;"></td>`);
+          }
+          cells.push(`<td width="${linkWidth}" height="${rowHeight}" style="width:${linkWidth}px;height:${rowHeight}px;${cellStyle}"><a href="${link.href}"${link.href.startsWith('http') ? ' target="_blank"' : ''} style="display:block;border:0;text-decoration:none;"><img src="${TRANSPARENT_PIXEL}" width="${linkWidth}" height="${rowHeight}" alt="${link.label}" style="${spacerStyle}width:${linkWidth}px;height:${rowHeight}px;"></a></td>`);
+          cursor = linkRight;
+        });
+        const tailWidth = Math.max(0, width - cursor);
+        if (tailWidth) {
+          cells.push(`<td width="${tailWidth}" height="${rowHeight}" style="width:${tailWidth}px;height:${rowHeight}px;${cellStyle}"><img src="${TRANSPARENT_PIXEL}" width="${tailWidth}" height="${rowHeight}" alt="" style="${spacerStyle}width:${tailWidth}px;height:${rowHeight}px;"></td>`);
+        }
+        rows.push(`<tr style="${cellStyle}">${cells.join('')}</tr>`);
       }
 
-      const contactTable = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${scaledContactWidth}" height="${height}" style="width:${scaledContactWidth}px;height:${height}px;border-collapse:collapse;border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt;padding:0;margin:0;table-layout:fixed;"><tbody>${contactRows.join('')}</tbody></table>`;
-      return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${width}" height="${height}" style="width:${width}px;height:${height}px;border-collapse:collapse;border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt;padding:0;margin:0;table-layout:fixed;"><tbody><tr style="${cellStyle}"><td width="${leftWidth}" height="${height}" style="width:${leftWidth}px;height:${height}px;${cellStyle}">${leftImg}</td><td width="${scaledContactWidth}" height="${height}" style="width:${scaledContactWidth}px;height:${height}px;${cellStyle}">${contactTable}</td>${rightWidth ? `<td width="${rightWidth}" height="${height}" style="width:${rightWidth}px;height:${height}px;${cellStyle}">${rightImg}</td>` : ''}</tr></tbody></table>`;
+      return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${width}" height="${height}" background="${fullImage}" style="width:${width}px;height:${height}px;border-collapse:collapse;border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt;padding:0;margin:0;table-layout:fixed;background-image:url('${fullImage}');background-repeat:no-repeat;background-size:${width}px ${height}px;"><tbody>${rows.join('')}</tbody></table>`;
     };
 
     const render = () => {
