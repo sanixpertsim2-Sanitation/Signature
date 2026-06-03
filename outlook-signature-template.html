@@ -146,7 +146,7 @@
 
     .preview-panel {
       padding: 18px;
-      overflow-x: auto;
+      overflow: hidden;
     }
 
     .preview-title {
@@ -170,11 +170,13 @@
     }
 
     .signature-stage {
-      display: inline-block;
+      display: block;
+      width: 100%;
       padding: 16px;
       background: #fff;
       border: 1px solid #e7eef4;
       box-shadow: 0 14px 34px rgba(18, 42, 60, .08);
+      overflow: hidden;
     }
 
     .copy-source {
@@ -196,6 +198,14 @@
         gap: 8px;
       }
 
+      .preview-panel {
+        padding: 12px;
+      }
+
+      .signature-stage {
+        padding: 10px;
+      }
+
       .status {
         white-space: normal;
       }
@@ -205,7 +215,7 @@
 <body>
   <main>
     <h1>SaniXperts Signature Builder</h1>
-    <p class="subhead">Choose Vince Template 1, Haron Template 2, Haron Template 3, or Vince Template 4, adjust only the scale, then copy the selected signature. Contact details stay clickable.</p>
+    <p class="subhead">Choose a signature template, adjust only the scale, then copy the selected signature. Contact details stay clickable.</p>
 
     <section class="panel toolbar" aria-label="Signature scale">
       <label for="scaleInput">Scale signature size</label>
@@ -237,12 +247,17 @@
         <strong>Vince Template 4</strong>
         <span>White Vince Yako signature artwork.</span>
       </button>
+      <button class="template-card" type="button" data-template="haron5" aria-pressed="false">
+        <span class="swatch"></span>
+        <strong>Haron Template 5</strong>
+        <span>Premium Haron Toma signature artwork.</span>
+      </button>
     </section>
 
     <section class="panel preview-panel" aria-label="Selected signature preview">
       <div class="preview-title">
         <h2 id="templateTitle">Vince Template 1</h2>
-        <span id="templateHint">Template 1 of 4</span>
+        <span id="templateHint">Template 1 of 5</span>
       </div>
       <div class="signature-stage" id="signaturePreview"></div>
     </section>
@@ -261,7 +276,7 @@
     const templates = {
       vince: {
         title: 'Vince Template 1',
-        hint: 'Template 1 of 4',
+        hint: 'Template 1 of 5',
         src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780445408/ChatGPT_Image_Jun_2_2026_08_09_24_PM_kmi4wb.png',
         alt: 'Vince Yako, Manager, SaniXperts Inc.',
         mapName: 'vince-template-1-map',
@@ -276,7 +291,7 @@
       },
       haron: {
         title: 'Haron Template 2',
-        hint: 'Template 2 of 4',
+        hint: 'Template 2 of 5',
         src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780523461/ChatGPT_Image_Jun_3_2026_05_47_21_PM_xcnjsa.png',
         alt: 'Haron Toma, Founder and CEO, SaniXperts Inc.',
         mapName: 'haron-template-2-map',
@@ -291,7 +306,7 @@
       },
       haron3: {
         title: 'Haron Template 3',
-        hint: 'Template 3 of 4',
+        hint: 'Template 3 of 5',
         src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780523453/ChatGPT_Image_Jun_3_2026_05_47_13_PM_znlvgt.png',
         alt: 'Haron Toma, Founder and CEO, SaniXperts Inc.',
         mapName: 'haron-template-3-map',
@@ -306,7 +321,7 @@
       },
       vince4: {
         title: 'Vince Template 4',
-        hint: 'Template 4 of 4',
+        hint: 'Template 4 of 5',
         src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780385961/ChatGPT_Image_Jun_2_2026_03_39_12_AM_oy9pyz.png',
         alt: 'Vince Yako, Manager, SaniXperts Inc.',
         mapName: 'vince-template-4-map',
@@ -318,6 +333,21 @@
           { label: 'www.SaniXperts.ca', href: WEBSITE, rect: [1268, 344, 1785, 430] },
           { label: '301-1882 Upper James St. Hamilton, ON L9B 1K4', href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4', rect: [1268, 430, 1845, 555] }
         ]
+      },
+      haron5: {
+        title: 'Haron Template 5',
+        hint: 'Template 5 of 5',
+        src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780524723/ChatGPT_Image_Jun_3_2026_06_11_39_PM_pkzbyj.png',
+        alt: 'Haron Toma, Founder and CEO, SaniXperts Inc.',
+        mapName: 'haron-template-5-map',
+        areas: [
+          { label: 'SaniXperts website', href: WEBSITE, rect: [120, 90, 700, 620] },
+          { label: '(905) 971-2019', href: 'tel:+19059712019', rect: [825, 230, 1215, 305] },
+          { label: 'haron@sanixperts.ca', href: 'mailto:haron@sanixperts.ca', rect: [825, 305, 1260, 380] },
+          { label: '(289) 674-7265', href: 'tel:+12896747265', rect: [825, 380, 1215, 455] },
+          { label: 'www.SaniXperts.ca', href: WEBSITE, rect: [825, 455, 1270, 530] },
+          { label: '301-1632 Upper James St. Hamilton, ON L9B1K4', href: 'https://www.google.com/maps/search/?api=1&query=301-1632%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B1K4', rect: [825, 530, 1325, 640] }
+        ]
       }
     };
 
@@ -325,32 +355,37 @@
 
     const scaleInput = document.getElementById('scaleInput');
     const scaleFactor = () => Number(scaleInput.value) / 100;
-    const scaledRect = rect => rect.map(value => Math.round(value * BASE_TO_DISPLAY * scaleFactor())).join(',');
+    const scaledRect = (rect, imageScale) => rect.map(value => Math.round(value * imageScale)).join(',');
+    const copyWidth = () => Math.round(DISPLAY_WIDTH * scaleFactor());
+    const copyHeight = () => Math.round(DISPLAY_HEIGHT * scaleFactor());
+    const previewWidth = () => {
+      const stage = document.getElementById('signaturePreview');
+      const available = Math.max(220, stage.clientWidth - 2);
+      return Math.min(copyWidth(), available);
+    };
 
-    const renderSignature = template => {
-      const scale = scaleFactor();
-      const width = Math.round(DISPLAY_WIDTH * scale);
-      const height = Math.round(DISPLAY_HEIGHT * scale);
+    const renderSignature = (template, width) => {
+      const imageScale = width / BASE_WIDTH;
+      const height = Math.round(BASE_HEIGHT * imageScale);
       const areas = template.areas.map(area => {
         const target = area.href.startsWith('http') ? ' target="_blank"' : '';
-        return `<area shape="rect" coords="${scaledRect(area.rect)}" href="${area.href}" alt="${area.label}"${target}>`;
+        return `<area shape="rect" coords="${scaledRect(area.rect, imageScale)}" href="${area.href}" alt="${area.label}"${target}>`;
       }).join('');
 
-      return `<img src="${template.src}" width="${width}" height="${height}" usemap="#${template.mapName}" alt="${template.alt}" style="display:block;width:${width}px;height:${height}px;max-width:100%;border:0;outline:none;text-decoration:none;"><map name="${template.mapName}">${areas}</map>`;
+      return `<img src="${template.src}" width="${width}" height="${height}" usemap="#${template.mapName}" alt="${template.alt}" style="display:block;width:${width}px;height:${height}px;border:0;outline:none;text-decoration:none;"><map name="${template.mapName}">${areas}</map>`;
     };
 
     const render = () => {
       const template = templates[selectedTemplate];
-      const html = renderSignature(template);
-      const width = Math.round(DISPLAY_WIDTH * scaleFactor());
-      const height = Math.round(DISPLAY_HEIGHT * scaleFactor());
+      const previewHtml = renderSignature(template, previewWidth());
+      const copyHtml = renderSignature(template, copyWidth());
 
-      document.getElementById('signaturePreview').innerHTML = html;
-      document.getElementById('copySource').innerHTML = html;
+      document.getElementById('signaturePreview').innerHTML = previewHtml;
+      document.getElementById('copySource').innerHTML = copyHtml;
       document.getElementById('templateTitle').textContent = template.title;
       document.getElementById('templateHint').textContent = template.hint;
       document.getElementById('scaleValue').textContent = `${scaleInput.value}%`;
-      document.getElementById('sizeValue').textContent = `${width} x ${height} px`;
+      document.getElementById('sizeValue').textContent = `${copyWidth()} x ${copyHeight()} px`;
     };
 
     document.querySelectorAll('.template-card').forEach(card => {
@@ -365,6 +400,7 @@
     });
 
     scaleInput.addEventListener('input', render);
+    window.addEventListener('resize', render);
 
     document.getElementById('copyButton').addEventListener('click', async () => {
       const source = document.getElementById('copySource');
