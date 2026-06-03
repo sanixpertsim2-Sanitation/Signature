@@ -160,7 +160,7 @@
     .edit-layer {
       display: none;
       position: absolute;
-      color: #f7f4ef;
+      color: var(--theme-text, #f7f4ef);
       white-space: nowrap;
       text-shadow: 0 4px 4px rgba(0,0,0,.9), 0 0 5px rgba(255,255,255,.45);
       z-index: 3;
@@ -173,7 +173,7 @@
       z-index: 2;
       pointer-events: none;
       background:
-        radial-gradient(circle at 18% 52%, rgba(8,34,56,.95), rgba(3,13,23,.98) 48%, rgba(2,8,15,.98) 100%);
+        radial-gradient(circle at 18% 52%, var(--theme-mask-1, rgba(8,34,56,.95)), var(--theme-mask-2, rgba(3,13,23,.98)) 48%, var(--theme-mask-3, rgba(2,8,15,.98)) 100%);
       box-shadow: 0 0 28px 16px rgba(3,13,23,.92);
     }
 
@@ -326,11 +326,41 @@
     baseImage.src = 'sanixperts-reference-signature.png';
     const backgroundInput = document.getElementById('backgroundInput');
     const themes = {
-      dark: null,
-      white: { r: 242, g: 247, b: 250, strength: .86 },
-      silver: { r: 176, g: 190, b: 202, strength: .76 },
-      blue: { r: 24, g: 77, b: 112, strength: .78 },
-      ice: { r: 210, g: 236, b: 247, strength: .82 }
+      dark: {
+        bg: null,
+        text: [247, 244, 239],
+        contact: '#f7f4ef',
+        mask: ['rgba(8,34,56,.95)', 'rgba(3,13,23,.98)', 'rgba(2,8,15,.98)'],
+        shadow: 'rgba(0,0,0,.9)'
+      },
+      white: {
+        bg: { r: 244, g: 248, b: 250, strength: .9 },
+        text: [21, 38, 54],
+        contact: '#173047',
+        mask: ['rgba(240,246,249,.97)', 'rgba(227,235,240,.99)', 'rgba(210,220,227,.99)'],
+        shadow: 'rgba(255,255,255,.85)'
+      },
+      silver: {
+        bg: { r: 183, g: 195, b: 204, strength: .82 },
+        text: [27, 42, 56],
+        contact: '#1d3141',
+        mask: ['rgba(193,204,212,.97)', 'rgba(174,187,197,.99)', 'rgba(151,165,177,.99)'],
+        shadow: 'rgba(255,255,255,.75)'
+      },
+      blue: {
+        bg: { r: 18, g: 70, b: 108, strength: .72 },
+        text: [245, 249, 252],
+        contact: '#f5f9fc',
+        mask: ['rgba(12,54,86,.97)', 'rgba(5,32,55,.99)', 'rgba(2,20,37,.99)'],
+        shadow: 'rgba(0,0,0,.88)'
+      },
+      ice: {
+        bg: { r: 212, g: 238, b: 248, strength: .88 },
+        text: [15, 57, 83],
+        contact: '#103953',
+        mask: ['rgba(215,239,248,.97)', 'rgba(195,226,238,.99)', 'rgba(172,208,224,.99)'],
+        shadow: 'rgba(255,255,255,.8)'
+      }
     };
 
     const defaults = {
@@ -390,6 +420,16 @@
     scale.addEventListener('input', updateScale);
     updateScale();
 
+    const activeTheme = () => themes[backgroundInput.value] || themes.dark;
+
+    const setPreviewTheme = () => {
+      const theme = activeTheme();
+      document.documentElement.style.setProperty('--theme-text', theme.contact);
+      document.documentElement.style.setProperty('--theme-mask-1', theme.mask[0]);
+      document.documentElement.style.setProperty('--theme-mask-2', theme.mask[1]);
+      document.documentElement.style.setProperty('--theme-mask-3', theme.mask[2]);
+    };
+
     const drawText = (ctx, text, options) => {
       ctx.save();
       ctx.fillStyle = options.color;
@@ -408,35 +448,60 @@
     };
 
     const paintMask = (ctx, x, y, width, height) => {
+      const theme = activeTheme();
       const gradient = ctx.createRadialGradient(x + width * .18, y + height * .52, 2, x + width * .5, y + height * .5, width * .75);
-      gradient.addColorStop(0, 'rgba(8,34,56,.97)');
-      gradient.addColorStop(.48, 'rgba(3,13,23,.99)');
-      gradient.addColorStop(1, 'rgba(2,8,15,.99)');
+      gradient.addColorStop(0, theme.mask[0]);
+      gradient.addColorStop(.48, theme.mask[1]);
+      gradient.addColorStop(1, theme.mask[2]);
       ctx.fillStyle = gradient;
       ctx.fillRect(x, y, width, height);
     };
 
     const applyBackgroundTheme = (ctx, themeName) => {
-      const theme = themes[themeName];
-      if (!theme) return;
+      const theme = themes[themeName] || themes.dark;
+      if (!theme.bg) return;
 
       const image = ctx.getImageData(0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
       const data = image.data;
+      const bg = theme.bg;
       for (let i = 0; i < data.length; i += 4) {
+        const pixel = i / 4;
+        const x = pixel % SOURCE_WIDTH;
+        const y = Math.floor(pixel / SOURCE_WIDTH);
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
         const brightness = (r * .299) + (g * .587) + (b * .114);
         const blueAccent = b > 120 && b > r * 1.25;
-        const whiteText = brightness > 165;
-        if (brightness < 95 && !blueAccent && !whiteText) {
-          const factor = theme.strength * (1 - brightness / 115);
-          data[i] = Math.round(r * (1 - factor) + theme.r * factor);
-          data[i + 1] = Math.round(g * (1 - factor) + theme.g * factor);
-          data[i + 2] = Math.round(b * (1 - factor) + theme.b * factor);
+        const logoCore = x < 520 && y < 520;
+        if (brightness < 105 && !blueAccent) {
+          const factor = bg.strength * (1 - brightness / 125);
+          data[i] = Math.round(r * (1 - factor) + bg.r * factor);
+          data[i + 1] = Math.round(g * (1 - factor) + bg.g * factor);
+          data[i + 2] = Math.round(b * (1 - factor) + bg.b * factor);
+        } else if (brightness > 145 && !blueAccent && !logoCore) {
+          const contrast = Math.min(1, (brightness - 145) / 90);
+          const factor = .88 * contrast;
+          data[i] = Math.round(r * (1 - factor) + theme.text[0] * factor);
+          data[i + 1] = Math.round(g * (1 - factor) + theme.text[1] * factor);
+          data[i + 2] = Math.round(b * (1 - factor) + theme.text[2] * factor);
         }
       }
       ctx.putImageData(image, 0, 0);
+
+      if (themeName !== 'dark' && themeName !== 'blue') {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(38, 94, 126, .38)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(2, 2, SOURCE_WIDTH - 4, SOURCE_HEIGHT - 4);
+        ctx.strokeStyle = 'rgba(0, 145, 220, .72)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, 579);
+        ctx.lineTo(SOURCE_WIDTH, 579);
+        ctx.stroke();
+        ctx.restore();
+      }
     };
 
     const renderSignatureCanvas = (includeEdits = true) => {
@@ -446,6 +511,7 @@
       const ctx = canvas.getContext('2d');
       ctx.drawImage(baseImage.complete ? baseImage : sourceImage, 0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
       applyBackgroundTheme(ctx, backgroundInput.value);
+      const theme = activeTheme();
 
       const name = document.getElementById('nameInput').value.trim().toUpperCase();
       const position = document.getElementById('positionInput').value.trim().toUpperCase();
@@ -459,7 +525,8 @@
         paintMask(ctx, 622, 105, 725, 105);
         drawText(ctx, name, {
           x: 640, y: 118, maxX: 1320, letterSpacing: 17,
-          color: '#f7f4ef',
+          color: theme.contact,
+          shadowColor: theme.shadow,
           font: '700 92px Georgia, "Times New Roman", serif'
         });
       }
@@ -477,8 +544,8 @@
       }
 
       ctx.font = '40px Arial, Helvetica, sans-serif';
-      ctx.fillStyle = '#f7f4ef';
-      ctx.shadowColor = 'rgba(0,0,0,.9)';
+      ctx.fillStyle = theme.contact;
+      ctx.shadowColor = theme.shadow;
       ctx.shadowBlur = 5;
       ctx.shadowOffsetY = 4;
 
@@ -561,7 +628,11 @@
         status.textContent = 'Copy blocked by browser; select the signature preview and copy manually';
       }
     });
-    backgroundInput.addEventListener('change', refreshPreviewImage);
+    backgroundInput.addEventListener('change', () => {
+      setPreviewTheme();
+      refreshPreviewImage();
+    });
+    setPreviewTheme();
     baseImage.addEventListener('load', refreshPreviewImage, { once: true });
   </script>
 </body>
