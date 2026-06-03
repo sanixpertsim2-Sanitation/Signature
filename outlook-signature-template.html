@@ -1,85 +1,393 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SaniXperts Outlook Signature Template</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SaniXperts Signature Builder</title>
   <style>
-    :root { --scale: 0.35; }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; padding: 20px; font-family: Arial, Helvetica, sans-serif; color: #16202b; background: #f3f6f9; }
-    .editor { width: min(1060px, 100%); margin: 0 auto 18px; padding: 18px; background: #fff; border: 1px solid #d9e2eb; border-radius: 7px; box-shadow: 0 12px 28px rgba(19,45,69,.09); }
-    h1 { margin: 0 0 14px; color: #07194a; font-size: 20px; line-height: 1.2; }
-    .controls { display: grid; grid-template-columns: repeat(5, minmax(150px, 1fr)); gap: 12px; align-items: end; }
-    .scale-field { grid-column: 1 / -1; }
-    .field { display: grid; gap: 6px; }
-    label, .scale-label { color: #415062; font-size: 12px; font-weight: 700; }
-    input[type="text"], input[type="email"] { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #c8d1dc; border-radius: 5px; color: #17212c; background: #fff; font: 14px Arial, Helvetica, sans-serif; }
-    .scale-row { display: grid; grid-template-columns: 44px minmax(180px, 1fr) 54px; gap: 10px; align-items: center; color: #415062; font-size: 12px; font-weight: 700; }
-    input[type="range"] { width: 100%; accent-color: #128ce1; cursor: pointer; }
-    .actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-    button { height: 36px; padding: 0 14px; border: 1px solid #0d77c7; border-radius: 5px; color: #fff; background: #128ce1; font: 700 13px Arial, Helvetica, sans-serif; cursor: pointer; }
-    .status, .size-readout { color: #415062; font-size: 12px; font-weight: 700; }
-    .stage { width: 100%; overflow: auto; padding-bottom: 20px; }
-    .signature-wrap { width: min(1060px, 100%); margin: 0 auto; padding: 18px; background: #fff; border: 1px solid #d9e2eb; border-radius: 7px; box-shadow: 0 12px 28px rgba(19,45,69,.09); }
-    .signature-img { display: block; width: calc(2172px * var(--scale)); max-width: 100%; height: auto; border: 0; outline: none; text-decoration: none; }
-    .note { width: min(1060px, 100%); margin: 12px auto 0; color: #5e6d7b; font-size: 12px; line-height: 1.45; }
-    @media (max-width: 860px) { body { padding: 12px; } .controls { grid-template-columns: repeat(2, minmax(130px, 1fr)); } .scale-row, .actions { grid-column: 1 / -1; } }
+    :root {
+      --navy: #07194a;
+      --blue: #0d63e7;
+      --ink: #142433;
+      --muted: #607181;
+      --line: #d8e4ee;
+      --paper: #ffffff;
+      --page: #f3f7fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      color: var(--navy);
+      font-size: 26px;
+      line-height: 1.15;
+    }
+
+    .subhead {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 14px 34px rgba(21, 49, 72, .08);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    label {
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 24px;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .scale-value,
+    .size-value,
+    .status {
+      color: #405263;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    button {
+      height: 38px;
+      border: 1px solid #0b70bf;
+      border-radius: 5px;
+      color: #fff;
+      background: #128ce1;
+      padding: 0 14px;
+      font: 700 13px Arial, Helvetica, sans-serif;
+      cursor: pointer;
+    }
+
+    .chooser {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .template-card {
+      height: auto;
+      min-height: 118px;
+      padding: 12px;
+      text-align: left;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .template-card[aria-pressed="true"] {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(13, 99, 231, .16);
+    }
+
+    .template-card strong {
+      display: block;
+      color: var(--navy);
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .template-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .swatch {
+      width: 100%;
+      height: 42px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid rgba(0,0,0,.08);
+      background: linear-gradient(90deg, #010b16, #061b2f 56%, #0e8ff0);
+    }
+
+    .preview-panel {
+      padding: 18px;
+      overflow-x: auto;
+    }
+
+    .preview-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .preview-title h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 18px;
+    }
+
+    .preview-title span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .signature-stage {
+      display: inline-block;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #e7eef4;
+      box-shadow: 0 14px 34px rgba(18, 42, 60, .08);
+    }
+
+    .copy-source {
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 660px) {
+      main {
+        padding: 16px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .status {
+        white-space: normal;
+      }
+    }
   </style>
 </head>
 <body>
-  <section class="editor" aria-label="Signature controls">
-    <h1>SaniXperts Outlook Signature</h1>
-    <div class="controls">
-      <div class="field scale-field"><span class="scale-label">Scale signature size</span><div class="scale-row"><span>10%</span><input id="scaleControl" type="range" min="0.10" max="0.55" value="0.35" step="0.01" /><span id="scaleValue">35%</span></div></div>
-      <div class="field"><label for="nameInput">Name</label><input id="nameInput" type="text" value="VINCE YAKO" autocomplete="off" /></div>
-      <div class="field"><label for="positionInput">Position</label><input id="positionInput" type="text" value="MANAGER" autocomplete="off" /></div>
-      <div class="field"><label for="officeInput">Office</label><input id="officeInput" type="text" value="289-674-7205" autocomplete="off" /></div>
-      <div class="field"><label for="cellInput">Cell</label><input id="cellInput" type="text" value="289-683-2634" autocomplete="off" /></div>
-      <div class="field"><label for="emailInput">Mail</label><input id="emailInput" type="email" value="vince@sanixperts.ca" autocomplete="off" /></div>
-      <div class="actions"><button id="copySignature" type="button">Copy signature</button><span class="size-readout" id="sizeReadout">760 x 253 px</span><span class="status" id="copyStatus" aria-live="polite"></span></div>
-    </div>
-  </section>
-  <main class="stage" aria-label="Signature preview"><div class="signature-wrap"><img id="signatureImage" class="signature-img" src="sanixperts-reference-signature.png" width="760" alt="SaniXperts email signature" usemap="#preview-signature-map"><map name="preview-signature-map" id="previewMap"></map></div></main>
-  <p class="note">This template copies as one smooth image with clickable contact areas, so Outlook web will not show table/grid lines around the signature.</p>
+  <main>
+    <h1>SaniXperts Signature Builder</h1>
+    <p class="subhead">Choose Vince Template 1, Haron Template 2, Haron Template 3, or Vince Template 4, adjust only the scale, then copy the selected signature. Contact details stay clickable.</p>
+
+    <section class="panel toolbar" aria-label="Signature scale">
+      <label for="scaleInput">Scale signature size</label>
+      <input id="scaleInput" type="range" min="10" max="100" step="5" value="100">
+      <span class="scale-value" id="scaleValue">100%</span>
+      <button id="copyButton" type="button">Copy selected signature</button>
+      <span class="size-value" id="sizeValue">760 x 253 px</span>
+      <span class="status" id="status" aria-live="polite"></span>
+    </section>
+
+    <section class="chooser" aria-label="Template choices">
+      <button class="template-card" type="button" data-template="vince" aria-pressed="true">
+        <span class="swatch"></span>
+        <strong>Vince Template 1</strong>
+        <span>Existing Vince Yako signature.</span>
+      </button>
+      <button class="template-card" type="button" data-template="haron" aria-pressed="false">
+        <span class="swatch"></span>
+        <strong>Haron Template 2</strong>
+        <span>Haron Toma signature based on the supplied artwork.</span>
+      </button>
+      <button class="template-card" type="button" data-template="haron3" aria-pressed="false">
+        <span class="swatch"></span>
+        <strong>Haron Template 3</strong>
+        <span>Alternate Haron Toma signature artwork.</span>
+      </button>
+      <button class="template-card" type="button" data-template="vince4" aria-pressed="false">
+        <span class="swatch"></span>
+        <strong>Vince Template 4</strong>
+        <span>White Vince Yako signature artwork.</span>
+      </button>
+    </section>
+
+    <section class="panel preview-panel" aria-label="Selected signature preview">
+      <div class="preview-title">
+        <h2 id="templateTitle">Vince Template 1</h2>
+        <span id="templateHint">Template 1 of 4</span>
+      </div>
+      <div class="signature-stage" id="signaturePreview"></div>
+    </section>
+
+    <div class="copy-source" id="copySource" aria-hidden="true"></div>
+  </main>
+
   <script>
-    const SOURCE_WIDTH = 2172, SOURCE_HEIGHT = 724;
-    const DEFAULTS = { name: 'VINCE YAKO', position: 'MANAGER', office: '289-674-7205', cell: '289-683-2634', email: 'vince@sanixperts.ca' };
-    const image = document.getElementById('signatureImage'), scaleControl = document.getElementById('scaleControl'), scaleValue = document.getElementById('scaleValue'), sizeReadout = document.getElementById('sizeReadout'), status = document.getElementById('copyStatus'), previewMap = document.getElementById('previewMap'), nameInput = document.getElementById('nameInput'), positionInput = document.getElementById('positionInput'), officeInput = document.getElementById('officeInput'), cellInput = document.getElementById('cellInput'), emailInput = document.getElementById('emailInput');
-    const baseImage = new Image(); baseImage.crossOrigin = 'anonymous'; baseImage.src = 'sanixperts-reference-signature.png';
-    const cleanPhone = value => value.replace(/[^\d+]/g, '');
-    const linkAreas = [
-      { label: 'SaniXperts website', href: 'https://www.SaniXperts.ca', rect: [60, 80, 520, 560] },
-      { label: 'Call office phone', getHref: () => `tel:${cleanPhone(officeInput.value)}`, rect: [1480, 70, 1995, 150] },
-      { label: 'Call cell phone', getHref: () => `tel:${cleanPhone(cellInput.value)}`, rect: [1480, 150, 1995, 244] },
-      { label: 'Send email', getHref: () => `mailto:${emailInput.value.trim()}`, rect: [1480, 244, 2030, 326] },
-      { label: 'Open SaniXperts website', href: 'https://www.SaniXperts.ca', rect: [1476, 326, 1968, 407] },
-      { label: 'Open address in maps', href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4', rect: [1478, 407, 2088, 519] }
-    ];
-    const currentHref = area => area.getHref ? area.getHref() : area.href;
-    const scaledCoords = (rect, scale) => rect.map(value => Math.round(value * scale)).join(',');
-    const paintMask = (ctx, x, y, width, height) => { const gradient = ctx.createRadialGradient(x + width * .18, y + height * .52, 2, x + width * .5, y + height * .5, width * .75); gradient.addColorStop(0, 'rgba(8,34,56,.96)'); gradient.addColorStop(.48, 'rgba(3,13,23,.98)'); gradient.addColorStop(1, 'rgba(2,8,15,.98)'); ctx.fillStyle = gradient; ctx.fillRect(x, y, width, height); };
-    const measureSpacedText = (ctx, text, spacing) => { let width = 0; for (const char of text) width += ctx.measureText(char).width + spacing; return Math.max(0, width - spacing); };
-    const drawSpacedText = (ctx, text, x, y, spacing) => { let cursor = x; for (const char of text) { ctx.fillText(char, cursor, y); cursor += ctx.measureText(char).width + spacing; } };
-    const drawFittedSpacedText = (ctx, text, options) => { let fontSize = options.startSize; while (fontSize >= options.minSize) { let spacing = options.startLetterSpacing; while (spacing >= options.minLetterSpacing) { ctx.font = `${options.weight} ${fontSize}px ${options.family}`; if (measureSpacedText(ctx, text, spacing) <= options.maxWidth) { drawSpacedText(ctx, text, options.x, options.y, spacing); return; } spacing -= 1; } fontSize -= 2; } ctx.font = `${options.weight} ${options.minSize}px ${options.family}`; drawSpacedText(ctx, text, options.x, options.y, options.minLetterSpacing); };
-    const fitFontSize = (ctx, text, family, weight, maxWidth, startSize, minSize) => { let size = startSize; while (size > minSize) { ctx.font = `${weight} ${size}px ${family}`; if (ctx.measureText(text).width <= maxWidth) return size; size -= 2; } return minSize; };
-    const renderCanvas = () => {
-      const canvas = document.createElement('canvas'); canvas.width = SOURCE_WIDTH; canvas.height = SOURCE_HEIGHT; const ctx = canvas.getContext('2d'); ctx.drawImage(baseImage, 0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
-      const name = nameInput.value.trim().toUpperCase() || DEFAULTS.name, position = positionInput.value.trim().toUpperCase() || DEFAULTS.position, office = officeInput.value.trim() || DEFAULTS.office, cell = cellInput.value.trim() || DEFAULTS.cell, email = emailInput.value.trim() || DEFAULTS.email;
-      ctx.textBaseline = 'top';
-      if (name !== DEFAULTS.name) { paintMask(ctx, 622, 105, 725, 105); ctx.fillStyle = '#f7f4ef'; ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 4; drawFittedSpacedText(ctx, name, { x: 640, y: 118, maxWidth: 680, startSize: 92, minSize: 56, startLetterSpacing: 17, minLetterSpacing: 2, weight: '700', family: 'Georgia, "Times New Roman", serif' }); }
-      if (position !== DEFAULTS.position) { paintMask(ctx, 632, 242, 610, 55); ctx.fillStyle = '#0aa7f8'; ctx.shadowColor = 'rgba(0,156,255,.86)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 0; drawFittedSpacedText(ctx, position, { x: 646, y: 253, maxWidth: 560, startSize: 42, minSize: 24, startLetterSpacing: 24, minLetterSpacing: 2, weight: '700', family: 'Arial, Helvetica, sans-serif' }); }
-      ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 4; ctx.fillStyle = '#f7f4ef';
-      if (office !== DEFAULTS.office) { paintMask(ctx, 1562, 88, 400, 55); const text = `Office: ${office}`; const size = fitFontSize(ctx, text, 'Arial, Helvetica, sans-serif', '400', 390, 40, 26); ctx.font = `400 ${size}px Arial, Helvetica, sans-serif`; ctx.fillText(text, 1580, 96); }
-      if (cell !== DEFAULTS.cell) { paintMask(ctx, 1562, 174, 395, 55); const text = `Cell: ${cell}`; const size = fitFontSize(ctx, text, 'Arial, Helvetica, sans-serif', '400', 390, 40, 26); ctx.font = `400 ${size}px Arial, Helvetica, sans-serif`; ctx.fillText(text, 1580, 181); }
-      if (email !== DEFAULTS.email) { paintMask(ctx, 1562, 256, 430, 58); const size = fitFontSize(ctx, email, 'Arial, Helvetica, sans-serif', '400', 430, 40, 24); ctx.font = `400 ${size}px Arial, Helvetica, sans-serif`; ctx.fillText(email, 1580, 265); }
-      return canvas;
+    const BASE_WIDTH = 2172;
+    const BASE_HEIGHT = 724;
+    const DISPLAY_WIDTH = 760;
+    const DISPLAY_HEIGHT = 253;
+    const BASE_TO_DISPLAY = DISPLAY_WIDTH / BASE_WIDTH;
+    const WEBSITE = 'https://www.SaniXperts.ca';
+
+    const templates = {
+      vince: {
+        title: 'Vince Template 1',
+        hint: 'Template 1 of 4',
+        src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780445408/ChatGPT_Image_Jun_2_2026_08_09_24_PM_kmi4wb.png',
+        alt: 'Vince Yako, Manager, SaniXperts Inc.',
+        mapName: 'vince-template-1-map',
+        areas: [
+          { label: 'SaniXperts website', href: WEBSITE, rect: [70, 70, 505, 520] },
+          { label: 'Office: 289-674-7205', href: 'tel:+12896747205', rect: [1480, 70, 2030, 150] },
+          { label: 'Cell: 289-683-2634', href: 'tel:+12896832634', rect: [1480, 150, 2020, 244] },
+          { label: 'vince@sanixperts.ca', href: 'mailto:vince@sanixperts.ca', rect: [1480, 244, 2055, 326] },
+          { label: 'www.SaniXperts.ca', href: WEBSITE, rect: [1476, 326, 2010, 407] },
+          { label: '301-1882 Upper James St. Hamilton, ON L9B 1K4', href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4', rect: [1478, 407, 2110, 532] }
+        ]
+      },
+      haron: {
+        title: 'Haron Template 2',
+        hint: 'Template 2 of 4',
+        src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780523461/ChatGPT_Image_Jun_3_2026_05_47_21_PM_xcnjsa.png',
+        alt: 'Haron Toma, Founder and CEO, SaniXperts Inc.',
+        mapName: 'haron-template-2-map',
+        areas: [
+          { label: 'SaniXperts website', href: WEBSITE, rect: [70, 70, 505, 520] },
+          { label: '(905) 971-2019', href: 'tel:+19059712019', rect: [1480, 70, 2055, 150] },
+          { label: 'haron@sanixperts.ca', href: 'mailto:haron@sanixperts.ca', rect: [1480, 150, 2085, 244] },
+          { label: '(289) 674-7265', href: 'tel:+12896747265', rect: [1480, 244, 2050, 326] },
+          { label: 'www.SaniXperts.ca', href: WEBSITE, rect: [1476, 326, 2010, 407] },
+          { label: '301-1632 Upper James St. Hamilton, ON L9B1K4', href: 'https://www.google.com/maps/search/?api=1&query=301-1632%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B1K4', rect: [1478, 407, 2110, 532] }
+        ]
+      },
+      haron3: {
+        title: 'Haron Template 3',
+        hint: 'Template 3 of 4',
+        src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780523453/ChatGPT_Image_Jun_3_2026_05_47_13_PM_znlvgt.png',
+        alt: 'Haron Toma, Founder and CEO, SaniXperts Inc.',
+        mapName: 'haron-template-3-map',
+        areas: [
+          { label: 'SaniXperts website', href: WEBSITE, rect: [95, 85, 510, 505] },
+          { label: '(905) 971-2019', href: 'tel:+19059712019', rect: [1470, 80, 1935, 150] },
+          { label: 'haron@sanixperts.ca', href: 'mailto:haron@sanixperts.ca', rect: [1470, 150, 2045, 225] },
+          { label: '(289) 674-7265', href: 'tel:+12896747265', rect: [1470, 225, 1935, 300] },
+          { label: 'www.SaniXperts.ca', href: WEBSITE, rect: [1470, 300, 2020, 375] },
+          { label: '301-1632 Upper James St. Hamilton, ON L9B1K4', href: 'https://www.google.com/maps/search/?api=1&query=301-1632%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B1K4', rect: [1470, 375, 2095, 485] }
+        ]
+      },
+      vince4: {
+        title: 'Vince Template 4',
+        hint: 'Template 4 of 4',
+        src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780385961/ChatGPT_Image_Jun_2_2026_03_39_12_AM_oy9pyz.png',
+        alt: 'Vince Yako, Manager, SaniXperts Inc.',
+        mapName: 'vince-template-4-map',
+        areas: [
+          { label: 'SaniXperts website', href: WEBSITE, rect: [120, 120, 560, 520] },
+          { label: 'Office: 289-674-7205', href: 'tel:+12896747205', rect: [1268, 96, 1785, 176] },
+          { label: 'Cell: 289-683-2634', href: 'tel:+12896832634', rect: [1268, 176, 1760, 260] },
+          { label: 'vince@sanixperts.ca', href: 'mailto:vince@sanixperts.ca', rect: [1268, 260, 1785, 344] },
+          { label: 'www.SaniXperts.ca', href: WEBSITE, rect: [1268, 344, 1785, 430] },
+          { label: '301-1882 Upper James St. Hamilton, ON L9B 1K4', href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4', rect: [1268, 430, 1845, 555] }
+        ]
+      }
     };
-    const updateScale = () => { const scale = Number(scaleControl.value), width = Math.round(SOURCE_WIDTH * scale), height = Math.round(SOURCE_HEIGHT * scale); document.documentElement.style.setProperty('--scale', scale); scaleValue.textContent = `${Math.round(scale * 100)}%`; sizeReadout.textContent = `${width} x ${height} px`; image.width = width; image.height = height; previewMap.innerHTML = linkAreas.map(area => `<area shape="rect" coords="${scaledCoords(area.rect, scale)}" href="${currentHref(area)}" alt="${area.label}" target="_blank">`).join(''); };
-    const renderPreview = () => { if (!baseImage.complete) return; image.src = renderCanvas().toDataURL('image/png'); updateScale(); };
-    const buildCopyHtml = () => { const scale = Number(scaleControl.value), width = Math.round(SOURCE_WIDTH * scale), height = Math.round(SOURCE_HEIGHT * scale), mapName = `sx-signature-map-${Date.now()}`, src = renderCanvas().toDataURL('image/png'); const areas = linkAreas.map(area => `<area shape="rect" coords="${scaledCoords(area.rect, scale)}" href="${currentHref(area)}" alt="${area.label}" target="_blank">`).join(''); return `<img src="${src}" width="${width}" height="${height}" usemap="#${mapName}" alt="SaniXperts email signature" style="display:block;width:${width}px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;"><map name="${mapName}">${areas}</map>`; };
-    document.getElementById('copySignature').addEventListener('click', async () => { try { const html = buildCopyHtml(); await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob(['SaniXperts signature'], { type: 'text/plain' }) })]); status.textContent = 'Copied with editable details'; } catch (error) { status.textContent = 'Copy blocked. Select the signature image and copy manually.'; } });
-    [nameInput, positionInput, officeInput, cellInput, emailInput].forEach(input => input.addEventListener('input', renderPreview)); scaleControl.addEventListener('input', updateScale); baseImage.addEventListener('load', renderPreview, { once: true }); updateScale();
+
+    let selectedTemplate = 'vince';
+
+    const scaleInput = document.getElementById('scaleInput');
+    const scaleFactor = () => Number(scaleInput.value) / 100;
+    const scaledRect = rect => rect.map(value => Math.round(value * BASE_TO_DISPLAY * scaleFactor())).join(',');
+
+    const renderSignature = template => {
+      const scale = scaleFactor();
+      const width = Math.round(DISPLAY_WIDTH * scale);
+      const height = Math.round(DISPLAY_HEIGHT * scale);
+      const areas = template.areas.map(area => {
+        const target = area.href.startsWith('http') ? ' target="_blank"' : '';
+        return `<area shape="rect" coords="${scaledRect(area.rect)}" href="${area.href}" alt="${area.label}"${target}>`;
+      }).join('');
+
+      return `<img src="${template.src}" width="${width}" height="${height}" usemap="#${template.mapName}" alt="${template.alt}" style="display:block;width:${width}px;height:${height}px;max-width:100%;border:0;outline:none;text-decoration:none;"><map name="${template.mapName}">${areas}</map>`;
+    };
+
+    const render = () => {
+      const template = templates[selectedTemplate];
+      const html = renderSignature(template);
+      const width = Math.round(DISPLAY_WIDTH * scaleFactor());
+      const height = Math.round(DISPLAY_HEIGHT * scaleFactor());
+
+      document.getElementById('signaturePreview').innerHTML = html;
+      document.getElementById('copySource').innerHTML = html;
+      document.getElementById('templateTitle').textContent = template.title;
+      document.getElementById('templateHint').textContent = template.hint;
+      document.getElementById('scaleValue').textContent = `${scaleInput.value}%`;
+      document.getElementById('sizeValue').textContent = `${width} x ${height} px`;
+    };
+
+    document.querySelectorAll('.template-card').forEach(card => {
+      card.addEventListener('click', () => {
+        selectedTemplate = card.dataset.template;
+        document.querySelectorAll('.template-card').forEach(item => {
+          item.setAttribute('aria-pressed', String(item === card));
+        });
+        document.getElementById('status').textContent = '';
+        render();
+      });
+    });
+
+    scaleInput.addEventListener('input', render);
+
+    document.getElementById('copyButton').addEventListener('click', async () => {
+      const source = document.getElementById('copySource');
+      const html = source.innerHTML;
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob(['SaniXperts signature'], { type: 'text/plain' })
+          })
+        ]);
+        document.getElementById('status').textContent = 'Copied selected signature';
+      } catch (error) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(source);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.getElementById('status').textContent = 'Copy blocked. The signature HTML is selected for manual copy.';
+      }
+    });
+
+    render();
   </script>
 </body>
 </html>
