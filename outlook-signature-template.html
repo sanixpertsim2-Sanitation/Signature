@@ -180,12 +180,13 @@
     }
 
     .copy-source {
-      position: fixed;
-      left: -10000px;
+      position: absolute;
+      left: -9999px;
       top: 0;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      background: #fff;
     }
 
     @media (max-width: 660px) {
@@ -450,24 +451,35 @@
     scaleInput.addEventListener('input', render);
     window.addEventListener('resize', render);
 
+    const copyBySelection = source => {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(source);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      const copied = document.execCommand('copy');
+      selection.removeAllRanges();
+      return copied;
+    };
+
     document.getElementById('copyButton').addEventListener('click', async () => {
       const source = document.getElementById('copySource');
       const html = source.innerHTML;
       try {
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            'text/html': new Blob([html], { type: 'text/html' }),
-            'text/plain': new Blob(['SaniXperts signature'], { type: 'text/plain' })
-          })
-        ]);
+        if (!copyBySelection(source)) throw new Error('Selection copy failed');
         document.getElementById('status').textContent = 'Copied selected signature';
       } catch (error) {
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(source);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        document.getElementById('status').textContent = 'Copy blocked. The signature HTML is selected for manual copy.';
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'text/html': new Blob([html], { type: 'text/html' }),
+              'text/plain': new Blob(['SaniXperts signature'], { type: 'text/plain' })
+            })
+          ]);
+          document.getElementById('status').textContent = 'Copied selected signature';
+        } catch (clipboardError) {
+          document.getElementById('status').textContent = 'Copy blocked. Select the preview and copy manually.';
+        }
       }
     });
 
