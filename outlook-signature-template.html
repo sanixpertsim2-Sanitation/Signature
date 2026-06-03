@@ -363,8 +363,8 @@
     const scaleInput = document.getElementById('scaleInput');
     const scaleFactor = () => Number(scaleInput.value) / 100;
     const scaledRect = (rect, imageScale) => rect.map(value => Math.round(value * imageScale)).join(',');
-    const copyWidth = () => 600;
-    const copyHeight = () => Math.round(BASE_HEIGHT * (copyWidth() / BASE_WIDTH));
+    const copyWidth = () => Math.round(DISPLAY_WIDTH * scaleFactor());
+    const copyHeight = () => Math.round(DISPLAY_HEIGHT * scaleFactor());
     const previewWidth = () => {
       const stage = document.getElementById('signaturePreview');
       const available = Math.max(220, stage.clientWidth - 2);
@@ -382,59 +382,10 @@
       return `<img src="${template.src}" width="${width}" height="${height}" usemap="#${template.mapName}" alt="${template.alt}" style="display:block;width:${width}px;height:${height}px;border:0;outline:none;text-decoration:none;"><map name="${template.mapName}">${areas}</map>`;
     };
 
-    const uniqueSorted = values => [...new Set(values)].sort((a, b) => a - b);
-    const cropUrl = (src, x, y, cropWidth, cropHeight, outputWidth) => {
-      const transform = `c_crop,x_${x},y_${y},w_${cropWidth},h_${cropHeight}/c_scale,w_${outputWidth}`;
-      return src.replace('/image/upload/', `/image/upload/${transform}/`);
-    };
-    const linkForBand = (areas, y1, y2) => {
-      const cy = (y1 + y2) / 2;
-      return areas.find(area => cy >= area.rect[1] && cy <= area.rect[3]);
-    };
-
-    const renderSlicedSignature = (template, width) => {
-      const linkAreas = template.areas.filter(area => !area.label.toLowerCase().includes('sanixperts website'));
-      const imageScale = width / BASE_WIDTH;
-      const height = Math.round(BASE_HEIGHT * imageScale);
-      const bgColor = template.bgColor || '#020b14';
-      const minContactX = Math.min(...linkAreas.map(area => area.rect[0]));
-      const maxContactX = Math.max(...linkAreas.map(area => area.rect[2]));
-      const contactStart = Math.max(0, minContactX - 120);
-      const contactEnd = maxContactX > BASE_WIDTH * .68 ? BASE_WIDTH : Math.min(BASE_WIDTH, maxContactX + 160);
-      const yCuts = uniqueSorted([0, BASE_HEIGHT, ...linkAreas.flatMap(area => [area.rect[1], area.rect[3]])]);
-      const scaledYCuts = yCuts.map(value => Math.round(value * imageScale));
-      const leftWidth = Math.max(1, Math.round(contactStart * imageScale));
-      const rightWidth = Math.max(0, Math.round((BASE_WIDTH - contactEnd) * imageScale));
-      const contactWidth = Math.max(1, width - leftWidth - rightWidth);
-      const cellStyle = `padding:0;margin:0;border:0;border-collapse:collapse;font-size:0;line-height:0;mso-line-height-rule:exactly;background:${bgColor};`;
-      const imgStyle = 'display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;';
-      const leftSrc = cropUrl(template.src, 0, 0, contactStart, BASE_HEIGHT, leftWidth);
-      const rightSrc = rightWidth ? cropUrl(template.src, contactEnd, 0, BASE_WIDTH - contactEnd, BASE_HEIGHT, rightWidth) : '';
-      const leftImg = `<img src="${leftSrc}" width="${leftWidth}" height="${height}" style="${imgStyle}width:${leftWidth}px;height:${height}px;" alt="">`;
-      const rightImg = rightWidth ? `<img src="${rightSrc}" width="${rightWidth}" height="${height}" style="${imgStyle}width:${rightWidth}px;height:${height}px;" alt="">` : '';
-      const contactRows = [];
-
-      for (let y = 0; y < yCuts.length - 1; y += 1) {
-        const y1 = yCuts[y];
-        const y2 = yCuts[y + 1];
-        const rowHeight = Math.max(1, scaledYCuts[y + 1] - scaledYCuts[y]);
-        const link = linkForBand(linkAreas, y1, y2);
-        const src = cropUrl(template.src, contactStart, y1, contactEnd - contactStart, y2 - y1, contactWidth);
-        const img = `<img src="${src}" width="${contactWidth}" height="${rowHeight}" style="${imgStyle}width:${contactWidth}px;height:${rowHeight}px;" alt="${link ? link.label : ''}">`;
-        const content = link
-          ? `<a href="${link.href}"${link.href.startsWith('http') ? ' target="_blank"' : ''} style="display:block;border:0;text-decoration:none;">${img}</a>`
-          : img;
-        contactRows.push(`<tr><td bgcolor="${bgColor}" width="${contactWidth}" height="${rowHeight}" style="width:${contactWidth}px;height:${rowHeight}px;${cellStyle}">${content}</td></tr>`);
-      }
-
-      const contactTable = `<table cellpadding="0" cellspacing="0" border="0" width="${contactWidth}" height="${height}" bgcolor="${bgColor}" style="border-collapse:collapse;border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt;width:${contactWidth}px;height:${height}px;table-layout:fixed;background:${bgColor};"><tbody>${contactRows.join('')}</tbody></table>`;
-      return `<table cellpadding="0" cellspacing="0" border="0" width="${width}" height="${height}" bgcolor="${bgColor}" style="border-collapse:collapse;border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt;width:${width}px;height:${height}px;table-layout:fixed;background:${bgColor};"><tbody><tr><td bgcolor="${bgColor}" width="${leftWidth}" height="${height}" style="width:${leftWidth}px;height:${height}px;${cellStyle}">${leftImg}</td><td bgcolor="${bgColor}" width="${contactWidth}" height="${height}" style="width:${contactWidth}px;height:${height}px;${cellStyle}">${contactTable}</td>${rightWidth ? `<td bgcolor="${bgColor}" width="${rightWidth}" height="${height}" style="width:${rightWidth}px;height:${height}px;${cellStyle}">${rightImg}</td>` : ''}</tr></tbody></table>`;
-    };
-
     const render = () => {
       const template = templates[selectedTemplate];
       const previewHtml = renderSignature(template, previewWidth());
-      const copyHtml = renderSlicedSignature(template, copyWidth());
+      const copyHtml = renderSignature(template, copyWidth());
 
       document.getElementById('signaturePreview').innerHTML = previewHtml;
       document.getElementById('copySource').innerHTML = copyHtml;
