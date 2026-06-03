@@ -375,10 +375,58 @@
       return `<img src="${template.src}" width="${width}" height="${height}" usemap="#${template.mapName}" alt="${template.alt}" style="display:block;width:${width}px;height:${height}px;border:0;outline:none;text-decoration:none;"><map name="${template.mapName}">${areas}</map>`;
     };
 
+    const uniqueSorted = values => [...new Set(values)].sort((a, b) => a - b);
+    const cropUrl = (src, x, y, width, height, outputWidth) => {
+      const transform = `c_crop,x_${x},y_${y},w_${width},h_${height}/c_scale,w_${outputWidth}`;
+      return src.replace('/image/upload/', `/image/upload/${transform}/`);
+    };
+    const linkForCell = (template, x1, y1, x2, y2) => {
+      const cx = (x1 + x2) / 2;
+      const cy = (y1 + y2) / 2;
+      return template.areas.find(area => (
+        cx >= area.rect[0] && cx <= area.rect[2] &&
+        cy >= area.rect[1] && cy <= area.rect[3]
+      ));
+    };
+
+    const renderSlicedSignature = (template, width) => {
+      const imageScale = width / BASE_WIDTH;
+      const height = Math.round(BASE_HEIGHT * imageScale);
+      const xCuts = uniqueSorted([0, BASE_WIDTH, ...template.areas.flatMap(area => [area.rect[0], area.rect[2]])]);
+      const yCuts = uniqueSorted([0, BASE_HEIGHT, ...template.areas.flatMap(area => [area.rect[1], area.rect[3]])]);
+      const scaledXCuts = xCuts.map(value => Math.round(value * imageScale));
+      const scaledYCuts = yCuts.map(value => Math.round(value * imageScale));
+      const rows = [];
+
+      for (let y = 0; y < yCuts.length - 1; y += 1) {
+        const y1 = yCuts[y];
+        const y2 = yCuts[y + 1];
+        const rowHeight = Math.max(1, scaledYCuts[y + 1] - scaledYCuts[y]);
+        const cells = [];
+
+        for (let x = 0; x < xCuts.length - 1; x += 1) {
+          const x1 = xCuts[x];
+          const x2 = xCuts[x + 1];
+          const cellWidth = Math.max(1, scaledXCuts[x + 1] - scaledXCuts[x]);
+          const link = linkForCell(template, x1, y1, x2, y2);
+          const src = cropUrl(template.src, x1, y1, x2 - x1, y2 - y1, cellWidth);
+          const img = `<img src="${src}" width="${cellWidth}" height="${rowHeight}" alt="${link ? link.label : ''}" style="display:block;width:${cellWidth}px;height:${rowHeight}px;border:0;outline:none;text-decoration:none;">`;
+          const content = link
+            ? `<a href="${link.href}"${link.href.startsWith('http') ? ' target="_blank"' : ''} style="display:block;border:0;text-decoration:none;">${img}</a>`
+            : img;
+          cells.push(`<td width="${cellWidth}" height="${rowHeight}" style="width:${cellWidth}px;height:${rowHeight}px;padding:0;margin:0;border:0;border-collapse:collapse;font-size:0;line-height:0;">${content}</td>`);
+        }
+
+        rows.push(`<tr style="padding:0;margin:0;border:0;border-collapse:collapse;font-size:0;line-height:0;">${cells.join('')}</tr>`);
+      }
+
+      return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${width}" height="${height}" style="width:${width}px;height:${height}px;border-collapse:collapse;border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt;padding:0;margin:0;"><tbody>${rows.join('')}</tbody></table>`;
+    };
+
     const render = () => {
       const template = templates[selectedTemplate];
       const previewHtml = renderSignature(template, previewWidth());
-      const copyHtml = renderSignature(template, copyWidth());
+      const copyHtml = renderSlicedSignature(template, copyWidth());
 
       document.getElementById('signaturePreview').innerHTML = previewHtml;
       document.getElementById('copySource').innerHTML = copyHtml;
