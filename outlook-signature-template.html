@@ -389,7 +389,13 @@
       const imageRow = `<tr><td style="${cellStyle}"><img src="${fullImage}" width="${width}" style="display:block;border:0;outline:none;text-decoration:none;width:${width}px;height:auto;"></td></tr>`;
       const linkRows = linkAreas.map(area => {
         const target = area.href.startsWith('http') ? ' target="_blank"' : '';
-        return `<tr><td align="left" style="${cellStyle}"><a href="${area.href}"${target} style="display:block;text-decoration:none;border:0;"><img src="${TRANSPARENT_PIXEL}" width="${width}" height="40" alt="${area.label}" style="display:block;border:0;outline:none;text-decoration:none;width:${width}px;height:40px;"></a></td></tr>`;
+        const linkLeft = Math.round(area.rect[0] * (width / BASE_WIDTH));
+        const linkWidth = Math.max(1, Math.round((area.rect[2] - area.rect[0]) * (width / BASE_WIDTH)));
+        const rightWidth = Math.max(0, width - linkLeft - linkWidth);
+        const leftCell = linkLeft ? `<td width="${linkLeft}" style="width:${linkLeft}px;${cellStyle}"><img src="${TRANSPARENT_PIXEL}" width="${linkLeft}" height="40" alt="" style="display:block;border:0;outline:none;text-decoration:none;width:${linkLeft}px;height:40px;"></td>` : '';
+        const linkCell = `<td align="left" width="${linkWidth}" style="width:${linkWidth}px;${cellStyle}"><a href="${area.href}"${target} style="display:block;text-decoration:none;border:0;"><img src="${TRANSPARENT_PIXEL}" width="${linkWidth}" height="40" alt="${area.label}" style="display:block;border:0;outline:none;text-decoration:none;width:${linkWidth}px;height:40px;"></a></td>`;
+        const rightCell = rightWidth ? `<td width="${rightWidth}" style="width:${rightWidth}px;${cellStyle}"><img src="${TRANSPARENT_PIXEL}" width="${rightWidth}" height="40" alt="" style="display:block;border:0;outline:none;text-decoration:none;width:${rightWidth}px;height:40px;"></td>` : '';
+        return `<tr>${leftCell}${linkCell}${rightCell}</tr>`;
       }).join('');
 
       return `<table cellpadding="0" cellspacing="0" border="0" width="${width}" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;width:${width}px;">${imageRow}${linkRows}</table>`;
