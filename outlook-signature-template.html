@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaniXperts Outlook Signature Template</title>
+  <style>
+    :root {
+      --scale: .35;
+      --sig-width: 2172px;
+      --sig-height: 724px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #16202b;
+      background: #171c22;
+    }
+
+    .editor {
+      width: min(1130px, 100%);
+      margin: 0 auto 22px;
+      padding: 18px;
+      background: #f6f7f9;
+      border: 1px solid #d4dbe5;
+      border-radius: 7px;
+    }
+
+    .editor h1 {
+      margin: 0 0 15px;
+      font-size: 19px;
+      line-height: 1.2;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 13px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #415062;
+    }
+
+    .field input {
+      width: 100%;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid #c8d1dc;
+      border-radius: 5px;
+      font: 14px Arial, Helvetica, sans-serif;
+      color: #17212c;
+      background: #fff;
+    }
+
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .actions button {
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid #0d77c7;
+      border-radius: 5px;
+      color: #fff;
+      background: #128ce1;
+      font: 700 13px Arial, Helvetica, sans-serif;
+      cursor: pointer;
+    }
+
+    .actions button:active { transform: translateY(1px); }
+
+    .size-readout,
+    .copy-status {
+      font-size: 12px;
+      font-weight: 700;
+      color: #415062;
+    }
+
+    .scale-field { grid-column: 1 / -1; }
+
+    .scale-row {
+      display: grid;
+      grid-template-columns: 44px 1fr 54px;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #415062;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #178fe6;
+      cursor: pointer;
+    }
+
+    .stage {
+      width: 100%;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      padding-bottom: 18px;
+    }
+
+    .signature-box {
+      position: relative;
+      width: calc(var(--sig-width) * var(--scale));
+      height: calc(var(--sig-height) * var(--scale));
+      flex: 0 0 auto;
+    }
+
+    .signature {
+      position: absolute;
+      inset: 0;
+      width: var(--sig-width);
+      height: var(--sig-height);
+      transform: scale(var(--scale));
+      transform-origin: top left;
+      overflow: hidden;
+    }
+
+    .signature img {
+      display: block;
+      width: var(--sig-width);
+      height: var(--sig-height);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .edit-layer {
+      display: none;
+      position: absolute;
+      color: #f7f4ef;
+      white-space: nowrap;
+      text-shadow: 0 4px 4px rgba(0,0,0,.9), 0 0 5px rgba(255,255,255,.45);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .mask {
+      display: none;
+      position: absolute;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 52%, rgba(8,34,56,.95), rgba(3,13,23,.98) 48%, rgba(2,8,15,.98) 100%);
+      box-shadow: 0 0 28px 16px rgba(3,13,23,.92);
+    }
+
+    .edit-layer.changed,
+    .mask.changed {
+      display: block;
+    }
+
+    .name-mask { left: 622px; top: 105px; width: 725px; height: 105px; }
+    .name-text {
+      left: 640px;
+      top: 118px;
+      width: 680px;
+      font: 700 92px/1 Georgia, "Times New Roman", serif;
+      letter-spacing: 17px;
+      text-transform: uppercase;
+      overflow: hidden;
+      text-overflow: clip;
+    }
+
+    .position-mask { left: 632px; top: 242px; width: 375px; height: 55px; }
+    .position-text {
+      left: 646px;
+      top: 253px;
+      width: 350px;
+      color: #0aa7f8;
+      font: 700 42px/1 Arial, Helvetica, sans-serif;
+      letter-spacing: 24px;
+      text-transform: uppercase;
+      text-shadow: 0 0 6px rgba(0,156,255,.86);
+      overflow: hidden;
+    }
+
+    .office-mask { left: 1562px; top: 88px; width: 400px; height: 55px; }
+    .cell-mask { left: 1562px; top: 174px; width: 395px; height: 55px; }
+    .email-mask { left: 1562px; top: 256px; width: 430px; height: 58px; }
+
+    .contact-text {
+      left: 1580px;
+      width: 390px;
+      font: 40px/1.12 Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .office-text { top: 96px; }
+    .cell-text { top: 181px; }
+    .email-text { top: 265px; width: 430px; }
+
+    .hit {
+      position: absolute;
+      z-index: 4;
+      display: block;
+      background: transparent;
+      text-decoration: none;
+    }
+
+    .office-hit { left: 1480px; top: 70px; width: 515px; height: 80px; }
+    .cell-hit { left: 1480px; top: 158px; width: 515px; height: 74px; }
+    .email-hit { left: 1480px; top: 244px; width: 550px; height: 74px; }
+    .web-hit { left: 1476px; top: 326px; width: 492px; height: 75px; }
+    .address-hit { left: 1478px; top: 407px; width: 610px; height: 112px; }
+
+    @media (max-width: 900px) {
+      body { padding: 12px; }
+      .controls { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <section class="editor" aria-label="Signature editor controls">
+    <h1>Signature Editor</h1>
+    <div class="controls">
+      <div class="field scale-field">
+        <label for="scaleControl">Scale signature size</label>
+        <div class="scale-row">
+          <span>Small</span>
+          <input id="scaleControl" type="range" min="0.05" max="2" value="0.35" step="0.01" />
+          <span id="scaleValue">35%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="nameInput">Name</label>
+        <input id="nameInput" type="text" value="VINCE YAKO" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="positionInput">Position</label>
+        <input id="positionInput" type="text" value="MANAGER" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="officeInput">Office phone</label>
+        <input id="officeInput" type="text" value="289-674-7205" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="cellInput">Cell phone</label>
+        <input id="cellInput" type="text" value="289-683-2634" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="emailInput">Email</label>
+        <input id="emailInput" type="email" value="vince@sanixperts.ca" autocomplete="off" />
+      </div>
+      <div class="actions">
+        <button id="copySignature" type="button">Copy signature</button>
+        <span class="size-readout" id="sizeReadout">760 x 253 px</span>
+        <span class="copy-status" id="copyStatus" aria-live="polite"></span>
+      </div>
+    </div>
+  </section>
+
+  <main class="stage" aria-label="Signature preview">
+    <div class="signature-box">
+      <section class="signature" aria-label="SaniXperts email signature">
+        <img src="sanixperts-reference-signature.png" alt="SaniXperts signature template" width="2172" height="724" />
+
+        <span class="mask name-mask" data-mask-for="name"></span>
+        <span class="mask position-mask" data-mask-for="position"></span>
+        <span class="mask office-mask" data-mask-for="office"></span>
+        <span class="mask cell-mask" data-mask-for="cell"></span>
+        <span class="mask email-mask" data-mask-for="email"></span>
+
+        <span class="edit-layer name-text" id="sigName">VINCE YAKO</span>
+        <span class="edit-layer position-text" id="sigPosition">MANAGER</span>
+        <span class="edit-layer contact-text office-text">Office: <span id="sigOffice">289-674-7205</span></span>
+        <span class="edit-layer contact-text cell-text">Cell: <span id="sigCell">289-683-2634</span></span>
+        <span class="edit-layer contact-text email-text" id="sigEmail">vince@sanixperts.ca</span>
+
+        <a class="hit office-hit" id="officeLink" href="tel:2896747205" aria-label="Call office phone"></a>
+        <a class="hit cell-hit" id="cellLink" href="tel:2896832634" aria-label="Call cell phone"></a>
+        <a class="hit email-hit" id="emailLink" href="mailto:vince@sanixperts.ca" aria-label="Send email"></a>
+        <a class="hit web-hit" href="https://www.SaniXperts.ca" target="_blank" rel="noopener" aria-label="Open SaniXperts website"></a>
+        <a class="hit address-hit" href="https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4" target="_blank" rel="noopener" aria-label="Open address in maps"></a>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const SOURCE_WIDTH = 2172;
+    const SOURCE_HEIGHT = 724;
+    const sourceImage = document.querySelector('.signature img');
+
+    const defaults = {
+      name: 'VINCE YAKO',
+      position: 'MANAGER',
+      office: '289-674-7205',
+      cell: '289-683-2634',
+      email: 'vince@sanixperts.ca'
+    };
+
+    const cleanPhone = value => value.replace(/[^\d+]/g, '');
+    const setChanged = (key, changed) => {
+      const text = document.querySelector(key === 'name' ? '.name-text' : key === 'position' ? '.position-text' : `.${key}-text`);
+      const mask = document.querySelector(`[data-mask-for="${key}"]`);
+      text.classList.toggle('changed', changed);
+      mask.classList.toggle('changed', changed);
+    };
+
+    const bindText = (inputId, key, targetId, formatter = value => value) => {
+      const input = document.getElementById(inputId);
+      const target = document.getElementById(targetId);
+      const update = () => {
+        const raw = input.value.trim();
+        const value = formatter(raw);
+        target.textContent = value;
+        setChanged(key, value !== defaults[key]);
+      };
+      input.addEventListener('input', update);
+      update();
+    };
+
+    bindText('nameInput', 'name', 'sigName', value => value.toUpperCase());
+    bindText('positionInput', 'position', 'sigPosition', value => value.toUpperCase());
+    bindText('officeInput', 'office', 'sigOffice');
+    bindText('cellInput', 'cell', 'sigCell');
+    bindText('emailInput', 'email', 'sigEmail');
+
+    const officeInput = document.getElementById('officeInput');
+    const cellInput = document.getElementById('cellInput');
+    const emailInput = document.getElementById('emailInput');
+    const updateLinks = () => {
+      document.getElementById('officeLink').href = `tel:${cleanPhone(officeInput.value)}`;
+      document.getElementById('cellLink').href = `tel:${cleanPhone(cellInput.value)}`;
+      document.getElementById('emailLink').href = `mailto:${emailInput.value.trim()}`;
+    };
+    [officeInput, cellInput, emailInput].forEach(input => input.addEventListener('input', updateLinks));
+    updateLinks();
+
+    const scale = document.getElementById('scaleControl');
+    const scaleValue = document.getElementById('scaleValue');
+    const sizeReadout = document.getElementById('sizeReadout');
+    const updateScale = () => {
+      document.documentElement.style.setProperty('--scale', scale.value);
+      scaleValue.textContent = `${Math.round(Number(scale.value) * 100)}%`;
+      sizeReadout.textContent = `${Math.round(SOURCE_WIDTH * Number(scale.value))} x ${Math.round(SOURCE_HEIGHT * Number(scale.value))} px`;
+    };
+    scale.addEventListener('input', updateScale);
+    updateScale();
+
+    const drawText = (ctx, text, options) => {
+      ctx.save();
+      ctx.fillStyle = options.color;
+      ctx.shadowColor = options.shadowColor || 'rgba(0,0,0,.9)';
+      ctx.shadowBlur = options.shadowBlur || 5;
+      ctx.shadowOffsetY = options.shadowOffsetY || 4;
+      ctx.font = options.font;
+      ctx.textBaseline = 'top';
+      let x = options.x;
+      for (const char of text) {
+        ctx.fillText(char, x, options.y);
+        x += ctx.measureText(char).width + options.letterSpacing;
+        if (x > options.maxX) break;
+      }
+      ctx.restore();
+    };
+
+    const paintMask = (ctx, x, y, width, height) => {
+      const gradient = ctx.createRadialGradient(x + width * .18, y + height * .52, 2, x + width * .5, y + height * .5, width * .75);
+      gradient.addColorStop(0, 'rgba(8,34,56,.97)');
+      gradient.addColorStop(.48, 'rgba(3,13,23,.99)');
+      gradient.addColorStop(1, 'rgba(2,8,15,.99)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, y, width, height);
+    };
+
+    const renderSignatureCanvas = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = SOURCE_WIDTH;
+      canvas.height = SOURCE_HEIGHT;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(sourceImage, 0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
+
+      const name = document.getElementById('nameInput').value.trim().toUpperCase();
+      const position = document.getElementById('positionInput').value.trim().toUpperCase();
+      const office = document.getElementById('officeInput').value.trim();
+      const cell = document.getElementById('cellInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim();
+
+      if (name !== defaults.name) {
+        paintMask(ctx, 622, 105, 725, 105);
+        drawText(ctx, name, {
+          x: 640, y: 118, maxX: 1320, letterSpacing: 17,
+          color: '#f7f4ef',
+          font: '700 92px Georgia, "Times New Roman", serif'
+        });
+      }
+
+      if (position !== defaults.position) {
+        paintMask(ctx, 632, 242, 375, 55);
+        drawText(ctx, position, {
+          x: 646, y: 253, maxX: 996, letterSpacing: 24,
+          color: '#0aa7f8',
+          shadowColor: 'rgba(0,156,255,.86)',
+          shadowBlur: 6,
+          shadowOffsetY: 0,
+          font: '700 42px Arial, Helvetica, sans-serif'
+        });
+      }
+
+      ctx.font = '40px Arial, Helvetica, sans-serif';
+      ctx.fillStyle = '#f7f4ef';
+      ctx.shadowColor = 'rgba(0,0,0,.9)';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetY = 4;
+
+      if (office !== defaults.office) {
+        paintMask(ctx, 1562, 88, 400, 55);
+        ctx.fillText(`Office: ${office}`, 1580, 96);
+      }
+      if (cell !== defaults.cell) {
+        paintMask(ctx, 1562, 174, 395, 55);
+        ctx.fillText(`Cell: ${cell}`, 1580, 181);
+      }
+      if (email !== defaults.email) {
+        paintMask(ctx, 1562, 256, 430, 58);
+        ctx.fillText(email, 1580, 265);
+      }
+
+      return canvas;
+    };
+
+    const sliceData = (canvas, rect, scaleFactor) => {
+      const out = document.createElement('canvas');
+      out.width = Math.max(1, Math.round(rect.w * scaleFactor));
+      out.height = Math.max(1, Math.round(rect.h * scaleFactor));
+      out.getContext('2d').drawImage(canvas, rect.x, rect.y, rect.w, rect.h, 0, 0, out.width, out.height);
+      return { src: out.toDataURL('image/png'), width: out.width, height: out.height };
+    };
+
+    const imgTag = part => `<img src="${part.src}" width="${part.width}" height="${part.height}" style="display:block;border:0;outline:none;text-decoration:none;width:${part.width}px;height:${part.height}px;" alt="">`;
+    const link = (href, inner) => `<a href="${href}" style="display:block;border:0;text-decoration:none;">${inner}</a>`;
+
+    const buildCopyHtml = () => {
+      const s = Number(scale.value);
+      const canvas = renderSignatureCanvas();
+      const rows = [
+        [{ x: 0, y: 0, w: 2172, h: 70 }],
+        [{ x: 0, y: 70, w: 1480, h: 80 }, { x: 1480, y: 70, w: 515, h: 80, href: document.getElementById('officeLink').href }, { x: 1995, y: 70, w: 177, h: 80 }],
+        [{ x: 0, y: 150, w: 1480, h: 94 }, { x: 1480, y: 150, w: 515, h: 94, href: document.getElementById('cellLink').href }, { x: 1995, y: 150, w: 177, h: 94 }],
+        [{ x: 0, y: 244, w: 1480, h: 82 }, { x: 1480, y: 244, w: 550, h: 82, href: document.getElementById('emailLink').href }, { x: 2030, y: 244, w: 142, h: 82 }],
+        [{ x: 0, y: 326, w: 1476, h: 81 }, { x: 1476, y: 326, w: 492, h: 81, href: 'https://www.SaniXperts.ca' }, { x: 1968, y: 326, w: 204, h: 81 }],
+        [{ x: 0, y: 407, w: 1478, h: 112 }, { x: 1478, y: 407, w: 610, h: 112, href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4' }, { x: 2088, y: 407, w: 84, h: 112 }],
+        [{ x: 0, y: 519, w: 2172, h: 205 }]
+      ];
+
+      const tableWidth = Math.round(SOURCE_WIDTH * s);
+      const tableRows = rows.map(row => {
+        const cells = row.map(rect => {
+          const part = sliceData(canvas, rect, s);
+          const image = imgTag(part);
+          const body = rect.href ? link(rect.href, image) : image;
+          return `<td style="padding:0;margin:0;border:0;line-height:0;font-size:0;">${body}</td>`;
+        }).join('');
+        return `<tr>${cells}</tr>`;
+      }).join('');
+
+      return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-spacing:0;width:${tableWidth}px;max-width:100%;"><tbody>${tableRows}</tbody></table>`;
+    };
+
+    document.getElementById('copySignature').addEventListener('click', async () => {
+      const status = document.getElementById('copyStatus');
+      try {
+        if (!sourceImage.complete) await new Promise(resolve => sourceImage.addEventListener('load', resolve, { once: true }));
+        const html = buildCopyHtml();
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob(['SaniXperts signature'], { type: 'text/plain' })
+          })
+        ]);
+        status.textContent = 'Copied at selected size';
+      } catch (error) {
+        status.textContent = 'Copy blocked by browser; select the signature preview and copy manually';
+      }
+    });
+  </script>
+</body>
+</html>
