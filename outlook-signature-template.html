@@ -8,7 +8,7 @@
     :root { --scale: 0.35; }
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; padding: 20px; font-family: Arial, Helvetica, sans-serif; color: #16202b; background: #f3f6f9; }
-    .editor { width: min(1060px, 100%); margin: 0 auto 18px; padding: 18px; background: #fff; border: 1px solid #d9e2eb; border-radius: 7px; box-shadow: 0 12px 28px rgba(19, 45, 69, .09); }
+    .editor { width: min(1060px, 100%); margin: 0 auto 18px; padding: 18px; background: #fff; border: 1px solid #d9e2eb; border-radius: 7px; box-shadow: 0 12px 28px rgba(19,45,69,.09); }
     h1 { margin: 0 0 14px; color: #07194a; font-size: 20px; line-height: 1.2; }
     .controls { display: grid; grid-template-columns: repeat(5, minmax(150px, 1fr)); gap: 12px; align-items: end; }
     .scale-field { grid-column: 1 / -1; }
@@ -21,7 +21,7 @@
     button { height: 36px; padding: 0 14px; border: 1px solid #0d77c7; border-radius: 5px; color: #fff; background: #128ce1; font: 700 13px Arial, Helvetica, sans-serif; cursor: pointer; }
     .status, .size-readout { color: #415062; font-size: 12px; font-weight: 700; }
     .stage { width: 100%; overflow: auto; padding-bottom: 20px; }
-    .signature-wrap { width: min(1060px, 100%); margin: 0 auto; padding: 18px; background: #fff; border: 1px solid #d9e2eb; border-radius: 7px; box-shadow: 0 12px 28px rgba(19, 45, 69, .09); }
+    .signature-wrap { width: min(1060px, 100%); margin: 0 auto; padding: 18px; background: #fff; border: 1px solid #d9e2eb; border-radius: 7px; box-shadow: 0 12px 28px rgba(19,45,69,.09); }
     .signature-img { display: block; width: calc(2172px * var(--scale)); max-width: 100%; height: auto; border: 0; outline: none; text-decoration: none; }
     .note { width: min(1060px, 100%); margin: 12px auto 0; color: #5e6d7b; font-size: 12px; line-height: 1.45; }
     @media (max-width: 860px) { body { padding: 12px; } .controls { grid-template-columns: repeat(2, minmax(130px, 1fr)); } .scale-row, .actions { grid-column: 1 / -1; } }
@@ -59,14 +59,16 @@
     const currentHref = area => area.getHref ? area.getHref() : area.href;
     const scaledCoords = (rect, scale) => rect.map(value => Math.round(value * scale)).join(',');
     const paintMask = (ctx, x, y, width, height) => { const gradient = ctx.createRadialGradient(x + width * .18, y + height * .52, 2, x + width * .5, y + height * .5, width * .75); gradient.addColorStop(0, 'rgba(8,34,56,.96)'); gradient.addColorStop(.48, 'rgba(3,13,23,.98)'); gradient.addColorStop(1, 'rgba(2,8,15,.98)'); ctx.fillStyle = gradient; ctx.fillRect(x, y, width, height); };
-    const drawSpacedText = (ctx, text, x, y, maxX, letterSpacing) => { let cursor = x; for (const char of text) { ctx.fillText(char, cursor, y); cursor += ctx.measureText(char).width + letterSpacing; if (cursor > maxX) break; } };
+    const measureSpacedText = (ctx, text, spacing) => { let width = 0; for (const char of text) width += ctx.measureText(char).width + spacing; return Math.max(0, width - spacing); };
+    const drawSpacedText = (ctx, text, x, y, spacing) => { let cursor = x; for (const char of text) { ctx.fillText(char, cursor, y); cursor += ctx.measureText(char).width + spacing; } };
+    const drawFittedSpacedText = (ctx, text, options) => { let fontSize = options.startSize; while (fontSize >= options.minSize) { let spacing = options.startLetterSpacing; while (spacing >= options.minLetterSpacing) { ctx.font = `${options.weight} ${fontSize}px ${options.family}`; if (measureSpacedText(ctx, text, spacing) <= options.maxWidth) { drawSpacedText(ctx, text, options.x, options.y, spacing); return; } spacing -= 1; } fontSize -= 2; } ctx.font = `${options.weight} ${options.minSize}px ${options.family}`; drawSpacedText(ctx, text, options.x, options.y, options.minLetterSpacing); };
     const fitFontSize = (ctx, text, family, weight, maxWidth, startSize, minSize) => { let size = startSize; while (size > minSize) { ctx.font = `${weight} ${size}px ${family}`; if (ctx.measureText(text).width <= maxWidth) return size; size -= 2; } return minSize; };
     const renderCanvas = () => {
       const canvas = document.createElement('canvas'); canvas.width = SOURCE_WIDTH; canvas.height = SOURCE_HEIGHT; const ctx = canvas.getContext('2d'); ctx.drawImage(baseImage, 0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
       const name = nameInput.value.trim().toUpperCase() || DEFAULTS.name, position = positionInput.value.trim().toUpperCase() || DEFAULTS.position, office = officeInput.value.trim() || DEFAULTS.office, cell = cellInput.value.trim() || DEFAULTS.cell, email = emailInput.value.trim() || DEFAULTS.email;
       ctx.textBaseline = 'top';
-      if (name !== DEFAULTS.name) { paintMask(ctx, 622, 105, 725, 105); ctx.fillStyle = '#f7f4ef'; ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 4; ctx.font = '700 92px Georgia, "Times New Roman", serif'; drawSpacedText(ctx, name, 640, 118, 1320, 17); }
-      if (position !== DEFAULTS.position) { paintMask(ctx, 632, 242, 375, 55); ctx.fillStyle = '#0aa7f8'; ctx.shadowColor = 'rgba(0,156,255,.86)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 0; ctx.font = '700 42px Arial, Helvetica, sans-serif'; drawSpacedText(ctx, position, 646, 253, 996, 24); }
+      if (name !== DEFAULTS.name) { paintMask(ctx, 622, 105, 725, 105); ctx.fillStyle = '#f7f4ef'; ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 4; drawFittedSpacedText(ctx, name, { x: 640, y: 118, maxWidth: 680, startSize: 92, minSize: 56, startLetterSpacing: 17, minLetterSpacing: 2, weight: '700', family: 'Georgia, "Times New Roman", serif' }); }
+      if (position !== DEFAULTS.position) { paintMask(ctx, 632, 242, 610, 55); ctx.fillStyle = '#0aa7f8'; ctx.shadowColor = 'rgba(0,156,255,.86)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 0; drawFittedSpacedText(ctx, position, { x: 646, y: 253, maxWidth: 560, startSize: 42, minSize: 24, startLetterSpacing: 24, minLetterSpacing: 2, weight: '700', family: 'Arial, Helvetica, sans-serif' }); }
       ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 4; ctx.fillStyle = '#f7f4ef';
       if (office !== DEFAULTS.office) { paintMask(ctx, 1562, 88, 400, 55); const text = `Office: ${office}`; const size = fitFontSize(ctx, text, 'Arial, Helvetica, sans-serif', '400', 390, 40, 26); ctx.font = `400 ${size}px Arial, Helvetica, sans-serif`; ctx.fillText(text, 1580, 96); }
       if (cell !== DEFAULTS.cell) { paintMask(ctx, 1562, 174, 395, 55); const text = `Cell: ${cell}`; const size = fitFontSize(ctx, text, 'Arial, Helvetica, sans-serif', '400', 390, 40, 26); ctx.font = `400 ${size}px Arial, Helvetica, sans-serif`; ctx.fillText(text, 1580, 181); }
