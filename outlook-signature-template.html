@@ -5,241 +5,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SaniXperts Outlook Signature Template</title>
   <style>
-    :root {
-      --scale: 0.35;
-      --source-width: 2172;
-      --source-height: 724;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      padding: 20px;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #16202b;
-      background: #f3f6f9;
-    }
-
-    .editor {
-      width: min(980px, 100%);
-      margin: 0 auto 18px;
-      padding: 18px;
-      background: #fff;
-      border: 1px solid #d9e2eb;
-      border-radius: 7px;
-      box-shadow: 0 12px 28px rgba(19, 45, 69, .09);
-    }
-
-    h1 {
-      margin: 0 0 14px;
-      color: #07194a;
-      font-size: 20px;
-      line-height: 1.2;
-    }
-
-    .controls {
-      display: grid;
-      grid-template-columns: 48px minmax(180px, 1fr) 56px auto auto;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .controls span {
-      color: #415062;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      accent-color: #128ce1;
-      cursor: pointer;
-    }
-
-    button {
-      height: 36px;
-      padding: 0 14px;
-      border: 1px solid #0d77c7;
-      border-radius: 5px;
-      color: #fff;
-      background: #128ce1;
-      font: 700 13px Arial, Helvetica, sans-serif;
-      cursor: pointer;
-    }
-
-    .status {
-      color: #415062;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .stage {
-      width: 100%;
-      overflow: auto;
-      padding-bottom: 20px;
-    }
-
-    .signature-wrap {
-      width: min(980px, 100%);
-      margin: 0 auto;
-      padding: 18px;
-      background: #fff;
-      border: 1px solid #d9e2eb;
-      border-radius: 7px;
-      box-shadow: 0 12px 28px rgba(19, 45, 69, .09);
-    }
-
-    .signature-img {
-      display: block;
-      width: calc(2172px * var(--scale));
-      max-width: 100%;
-      height: auto;
-      border: 0;
-      outline: none;
-      text-decoration: none;
-    }
-
-    .note {
-      width: min(980px, 100%);
-      margin: 12px auto 0;
-      color: #5e6d7b;
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    @media (max-width: 720px) {
-      body {
-        padding: 12px;
-      }
-
-      .controls {
-        grid-template-columns: 44px 1fr 52px;
-      }
-
-      button,
-      .status {
-        grid-column: 1 / -1;
-      }
-    }
+    :root { --scale: 0.35; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 20px; font-family: Arial, Helvetica, sans-serif; color: #16202b; background: #f3f6f9; }
+    .editor { width: min(1060px, 100%); margin: 0 auto 18px; padding: 18px; background: #fff; border: 1px solid #d9e2eb; border-radius: 7px; box-shadow: 0 12px 28px rgba(19, 45, 69, .09); }
+    h1 { margin: 0 0 14px; color: #07194a; font-size: 20px; line-height: 1.2; }
+    .controls { display: grid; grid-template-columns: repeat(5, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+    .scale-field { grid-column: 1 / -1; }
+    .field { display: grid; gap: 6px; }
+    label, .scale-label { color: #415062; font-size: 12px; font-weight: 700; }
+    input[type="text"], input[type="email"] { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #c8d1dc; border-radius: 5px; color: #17212c; background: #fff; font: 14px Arial, Helvetica, sans-serif; }
+    .scale-row { display: grid; grid-template-columns: 44px minmax(180px, 1fr) 54px; gap: 10px; align-items: center; color: #415062; font-size: 12px; font-weight: 700; }
+    input[type="range"] { width: 100%; accent-color: #128ce1; cursor: pointer; }
+    .actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    button { height: 36px; padding: 0 14px; border: 1px solid #0d77c7; border-radius: 5px; color: #fff; background: #128ce1; font: 700 13px Arial, Helvetica, sans-serif; cursor: pointer; }
+    .status, .size-readout { color: #415062; font-size: 12px; font-weight: 700; }
+    .stage { width: 100%; overflow: auto; padding-bottom: 20px; }
+    .signature-wrap { width: min(1060px, 100%); margin: 0 auto; padding: 18px; background: #fff; border: 1px solid #d9e2eb; border-radius: 7px; box-shadow: 0 12px 28px rgba(19, 45, 69, .09); }
+    .signature-img { display: block; width: calc(2172px * var(--scale)); max-width: 100%; height: auto; border: 0; outline: none; text-decoration: none; }
+    .note { width: min(1060px, 100%); margin: 12px auto 0; color: #5e6d7b; font-size: 12px; line-height: 1.45; }
+    @media (max-width: 860px) { body { padding: 12px; } .controls { grid-template-columns: repeat(2, minmax(130px, 1fr)); } .scale-row, .actions { grid-column: 1 / -1; } }
   </style>
 </head>
 <body>
   <section class="editor" aria-label="Signature controls">
     <h1>SaniXperts Outlook Signature</h1>
     <div class="controls">
-      <span>Small</span>
-      <input id="scaleControl" type="range" min="0.20" max="0.55" value="0.35" step="0.01" />
-      <span id="scaleValue">35%</span>
-      <button id="copySignature" type="button">Copy signature</button>
-      <span class="status" id="copyStatus" aria-live="polite"></span>
+      <div class="field scale-field"><span class="scale-label">Scale signature size</span><div class="scale-row"><span>10%</span><input id="scaleControl" type="range" min="0.10" max="0.55" value="0.35" step="0.01" /><span id="scaleValue">35%</span></div></div>
+      <div class="field"><label for="nameInput">Name</label><input id="nameInput" type="text" value="VINCE YAKO" autocomplete="off" /></div>
+      <div class="field"><label for="positionInput">Position</label><input id="positionInput" type="text" value="MANAGER" autocomplete="off" /></div>
+      <div class="field"><label for="officeInput">Office</label><input id="officeInput" type="text" value="289-674-7205" autocomplete="off" /></div>
+      <div class="field"><label for="cellInput">Cell</label><input id="cellInput" type="text" value="289-683-2634" autocomplete="off" /></div>
+      <div class="field"><label for="emailInput">Mail</label><input id="emailInput" type="email" value="vince@sanixperts.ca" autocomplete="off" /></div>
+      <div class="actions"><button id="copySignature" type="button">Copy signature</button><span class="size-readout" id="sizeReadout">760 x 253 px</span><span class="status" id="copyStatus" aria-live="polite"></span></div>
     </div>
   </section>
-
-  <main class="stage" aria-label="Signature preview">
-    <div class="signature-wrap">
-      <img
-        id="signatureImage"
-        class="signature-img"
-        src="sanixperts-reference-signature.png"
-        width="760"
-        alt="SaniXperts email signature"
-        usemap="#preview-signature-map">
-      <map name="preview-signature-map" id="previewMap"></map>
-    </div>
-  </main>
-
-  <p class="note">
-    This version copies as one smooth image with clickable contact areas, so Outlook web will not show table/grid lines around the signature.
-  </p>
-
+  <main class="stage" aria-label="Signature preview"><div class="signature-wrap"><img id="signatureImage" class="signature-img" src="sanixperts-reference-signature.png" width="760" alt="SaniXperts email signature" usemap="#preview-signature-map"><map name="preview-signature-map" id="previewMap"></map></div></main>
+  <p class="note">This template copies as one smooth image with clickable contact areas, so Outlook web will not show table/grid lines around the signature.</p>
   <script>
-    const SOURCE_WIDTH = 2172;
-    const SOURCE_HEIGHT = 724;
-    const image = document.getElementById('signatureImage');
-    const scaleControl = document.getElementById('scaleControl');
-    const scaleValue = document.getElementById('scaleValue');
-    const status = document.getElementById('copyStatus');
-    const previewMap = document.getElementById('previewMap');
-
+    const SOURCE_WIDTH = 2172, SOURCE_HEIGHT = 724;
+    const DEFAULTS = { name: 'VINCE YAKO', position: 'MANAGER', office: '289-674-7205', cell: '289-683-2634', email: 'vince@sanixperts.ca' };
+    const image = document.getElementById('signatureImage'), scaleControl = document.getElementById('scaleControl'), scaleValue = document.getElementById('scaleValue'), sizeReadout = document.getElementById('sizeReadout'), status = document.getElementById('copyStatus'), previewMap = document.getElementById('previewMap'), nameInput = document.getElementById('nameInput'), positionInput = document.getElementById('positionInput'), officeInput = document.getElementById('officeInput'), cellInput = document.getElementById('cellInput'), emailInput = document.getElementById('emailInput');
+    const baseImage = new Image(); baseImage.crossOrigin = 'anonymous'; baseImage.src = 'sanixperts-reference-signature.png';
+    const cleanPhone = value => value.replace(/[^\d+]/g, '');
     const linkAreas = [
-      {
-        label: 'SaniXperts website',
-        href: 'https://www.SaniXperts.ca',
-        rect: [60, 80, 520, 560]
-      },
-      {
-        label: 'Call office phone',
-        href: 'tel:2896747205',
-        rect: [1480, 70, 1995, 150]
-      },
-      {
-        label: 'Call cell phone',
-        href: 'tel:2896832634',
-        rect: [1480, 150, 1995, 244]
-      },
-      {
-        label: 'Send email',
-        href: 'mailto:vince@sanixperts.ca',
-        rect: [1480, 244, 2030, 326]
-      },
-      {
-        label: 'Open SaniXperts website',
-        href: 'https://www.SaniXperts.ca',
-        rect: [1476, 326, 1968, 407]
-      },
-      {
-        label: 'Open address in maps',
-        href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4',
-        rect: [1478, 407, 2088, 519]
-      }
+      { label: 'SaniXperts website', href: 'https://www.SaniXperts.ca', rect: [60, 80, 520, 560] },
+      { label: 'Call office phone', getHref: () => `tel:${cleanPhone(officeInput.value)}`, rect: [1480, 70, 1995, 150] },
+      { label: 'Call cell phone', getHref: () => `tel:${cleanPhone(cellInput.value)}`, rect: [1480, 150, 1995, 244] },
+      { label: 'Send email', getHref: () => `mailto:${emailInput.value.trim()}`, rect: [1480, 244, 2030, 326] },
+      { label: 'Open SaniXperts website', href: 'https://www.SaniXperts.ca', rect: [1476, 326, 1968, 407] },
+      { label: 'Open address in maps', href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4', rect: [1478, 407, 2088, 519] }
     ];
-
+    const currentHref = area => area.getHref ? area.getHref() : area.href;
     const scaledCoords = (rect, scale) => rect.map(value => Math.round(value * scale)).join(',');
-
-    const updateScale = () => {
-      const scale = Number(scaleControl.value);
-      document.documentElement.style.setProperty('--scale', scale);
-      scaleValue.textContent = `${Math.round(scale * 100)}%`;
-      image.width = Math.round(SOURCE_WIDTH * scale);
-      image.height = Math.round(SOURCE_HEIGHT * scale);
-      previewMap.innerHTML = linkAreas.map(area =>
-        `<area shape="rect" coords="${scaledCoords(area.rect, scale)}" href="${area.href}" alt="${area.label}" target="_blank">`
-      ).join('');
+    const paintMask = (ctx, x, y, width, height) => { const gradient = ctx.createRadialGradient(x + width * .18, y + height * .52, 2, x + width * .5, y + height * .5, width * .75); gradient.addColorStop(0, 'rgba(8,34,56,.96)'); gradient.addColorStop(.48, 'rgba(3,13,23,.98)'); gradient.addColorStop(1, 'rgba(2,8,15,.98)'); ctx.fillStyle = gradient; ctx.fillRect(x, y, width, height); };
+    const drawSpacedText = (ctx, text, x, y, maxX, letterSpacing) => { let cursor = x; for (const char of text) { ctx.fillText(char, cursor, y); cursor += ctx.measureText(char).width + letterSpacing; if (cursor > maxX) break; } };
+    const fitFontSize = (ctx, text, family, weight, maxWidth, startSize, minSize) => { let size = startSize; while (size > minSize) { ctx.font = `${weight} ${size}px ${family}`; if (ctx.measureText(text).width <= maxWidth) return size; size -= 2; } return minSize; };
+    const renderCanvas = () => {
+      const canvas = document.createElement('canvas'); canvas.width = SOURCE_WIDTH; canvas.height = SOURCE_HEIGHT; const ctx = canvas.getContext('2d'); ctx.drawImage(baseImage, 0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
+      const name = nameInput.value.trim().toUpperCase() || DEFAULTS.name, position = positionInput.value.trim().toUpperCase() || DEFAULTS.position, office = officeInput.value.trim() || DEFAULTS.office, cell = cellInput.value.trim() || DEFAULTS.cell, email = emailInput.value.trim() || DEFAULTS.email;
+      ctx.textBaseline = 'top';
+      if (name !== DEFAULTS.name) { paintMask(ctx, 622, 105, 725, 105); ctx.fillStyle = '#f7f4ef'; ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 4; ctx.font = '700 92px Georgia, "Times New Roman", serif'; drawSpacedText(ctx, name, 640, 118, 1320, 17); }
+      if (position !== DEFAULTS.position) { paintMask(ctx, 632, 242, 375, 55); ctx.fillStyle = '#0aa7f8'; ctx.shadowColor = 'rgba(0,156,255,.86)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 0; ctx.font = '700 42px Arial, Helvetica, sans-serif'; drawSpacedText(ctx, position, 646, 253, 996, 24); }
+      ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 4; ctx.fillStyle = '#f7f4ef';
+      if (office !== DEFAULTS.office) { paintMask(ctx, 1562, 88, 400, 55); const text = `Office: ${office}`; const size = fitFontSize(ctx, text, 'Arial, Helvetica, sans-serif', '400', 390, 40, 26); ctx.font = `400 ${size}px Arial, Helvetica, sans-serif`; ctx.fillText(text, 1580, 96); }
+      if (cell !== DEFAULTS.cell) { paintMask(ctx, 1562, 174, 395, 55); const text = `Cell: ${cell}`; const size = fitFontSize(ctx, text, 'Arial, Helvetica, sans-serif', '400', 390, 40, 26); ctx.font = `400 ${size}px Arial, Helvetica, sans-serif`; ctx.fillText(text, 1580, 181); }
+      if (email !== DEFAULTS.email) { paintMask(ctx, 1562, 256, 430, 58); const size = fitFontSize(ctx, email, 'Arial, Helvetica, sans-serif', '400', 430, 40, 24); ctx.font = `400 ${size}px Arial, Helvetica, sans-serif`; ctx.fillText(email, 1580, 265); }
+      return canvas;
     };
-
-    const buildCopyHtml = () => {
-      const scale = Number(scaleControl.value);
-      const width = Math.round(SOURCE_WIDTH * scale);
-      const height = Math.round(SOURCE_HEIGHT * scale);
-      const mapName = `sx-signature-map-${Date.now()}`;
-      const areas = linkAreas.map(area =>
-        `<area shape="rect" coords="${scaledCoords(area.rect, scale)}" href="${area.href}" alt="${area.label}" target="_blank">`
-      ).join('');
-
-      return `<img src="https://sanixpertsim2-sanitation.github.io/Signature/sanixperts-reference-signature.png" width="${width}" height="${height}" usemap="#${mapName}" alt="SaniXperts email signature" style="display:block;width:${width}px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;"><map name="${mapName}">${areas}</map>`;
-    };
-
-    document.getElementById('copySignature').addEventListener('click', async () => {
-      try {
-        const html = buildCopyHtml();
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            'text/html': new Blob([html], { type: 'text/html' }),
-            'text/plain': new Blob(['SaniXperts signature'], { type: 'text/plain' })
-          })
-        ]);
-        status.textContent = 'Copied without grid lines';
-      } catch (error) {
-        status.textContent = 'Copy blocked. Select the signature image and copy manually.';
-      }
-    });
-
-    scaleControl.addEventListener('input', updateScale);
-    updateScale();
+    const updateScale = () => { const scale = Number(scaleControl.value), width = Math.round(SOURCE_WIDTH * scale), height = Math.round(SOURCE_HEIGHT * scale); document.documentElement.style.setProperty('--scale', scale); scaleValue.textContent = `${Math.round(scale * 100)}%`; sizeReadout.textContent = `${width} x ${height} px`; image.width = width; image.height = height; previewMap.innerHTML = linkAreas.map(area => `<area shape="rect" coords="${scaledCoords(area.rect, scale)}" href="${currentHref(area)}" alt="${area.label}" target="_blank">`).join(''); };
+    const renderPreview = () => { if (!baseImage.complete) return; image.src = renderCanvas().toDataURL('image/png'); updateScale(); };
+    const buildCopyHtml = () => { const scale = Number(scaleControl.value), width = Math.round(SOURCE_WIDTH * scale), height = Math.round(SOURCE_HEIGHT * scale), mapName = `sx-signature-map-${Date.now()}`, src = renderCanvas().toDataURL('image/png'); const areas = linkAreas.map(area => `<area shape="rect" coords="${scaledCoords(area.rect, scale)}" href="${currentHref(area)}" alt="${area.label}" target="_blank">`).join(''); return `<img src="${src}" width="${width}" height="${height}" usemap="#${mapName}" alt="SaniXperts email signature" style="display:block;width:${width}px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;"><map name="${mapName}">${areas}</map>`; };
+    document.getElementById('copySignature').addEventListener('click', async () => { try { const html = buildCopyHtml(); await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob(['SaniXperts signature'], { type: 'text/plain' }) })]); status.textContent = 'Copied with editable details'; } catch (error) { status.textContent = 'Copy blocked. Select the signature image and copy manually.'; } });
+    [nameInput, positionInput, officeInput, cellInput, emailInput].forEach(input => input.addEventListener('input', renderPreview)); scaleControl.addEventListener('input', updateScale); baseImage.addEventListener('load', renderPreview, { once: true }); updateScale();
   </script>
 </body>
 </html>
