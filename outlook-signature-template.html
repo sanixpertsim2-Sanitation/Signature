@@ -95,6 +95,17 @@
       color: #415062;
     }
 
+    select {
+      width: 100%;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid #c8d1dc;
+      border-radius: 5px;
+      font: 14px Arial, Helvetica, sans-serif;
+      color: #17212c;
+      background: #fff;
+    }
+
     .scale-field { grid-column: 1 / -1; }
 
     .scale-row {
@@ -263,6 +274,16 @@
         <label for="emailInput">Email</label>
         <input id="emailInput" type="email" value="vince@sanixperts.ca" autocomplete="off" />
       </div>
+      <div class="field">
+        <label for="backgroundInput">Background shade</label>
+        <select id="backgroundInput">
+          <option value="dark">Original black</option>
+          <option value="white">White pearl</option>
+          <option value="silver">Silver</option>
+          <option value="blue">Blue steel</option>
+          <option value="ice">Ice blue</option>
+        </select>
+      </div>
       <div class="actions">
         <button id="copySignature" type="button">Copy signature</button>
         <span class="size-readout" id="sizeReadout">760 x 253 px</span>
@@ -301,6 +322,16 @@
     const SOURCE_WIDTH = 2172;
     const SOURCE_HEIGHT = 724;
     const sourceImage = document.querySelector('.signature img');
+    const baseImage = new Image();
+    baseImage.src = 'sanixperts-reference-signature.png';
+    const backgroundInput = document.getElementById('backgroundInput');
+    const themes = {
+      dark: null,
+      white: { r: 242, g: 247, b: 250, strength: .86 },
+      silver: { r: 176, g: 190, b: 202, strength: .76 },
+      blue: { r: 24, g: 77, b: 112, strength: .78 },
+      ice: { r: 210, g: 236, b: 247, strength: .82 }
+    };
 
     const defaults = {
       name: 'VINCE YAKO',
@@ -385,18 +416,44 @@
       ctx.fillRect(x, y, width, height);
     };
 
-    const renderSignatureCanvas = () => {
+    const applyBackgroundTheme = (ctx, themeName) => {
+      const theme = themes[themeName];
+      if (!theme) return;
+
+      const image = ctx.getImageData(0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
+      const data = image.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const brightness = (r * .299) + (g * .587) + (b * .114);
+        const blueAccent = b > 120 && b > r * 1.25;
+        const whiteText = brightness > 165;
+        if (brightness < 95 && !blueAccent && !whiteText) {
+          const factor = theme.strength * (1 - brightness / 115);
+          data[i] = Math.round(r * (1 - factor) + theme.r * factor);
+          data[i + 1] = Math.round(g * (1 - factor) + theme.g * factor);
+          data[i + 2] = Math.round(b * (1 - factor) + theme.b * factor);
+        }
+      }
+      ctx.putImageData(image, 0, 0);
+    };
+
+    const renderSignatureCanvas = (includeEdits = true) => {
       const canvas = document.createElement('canvas');
       canvas.width = SOURCE_WIDTH;
       canvas.height = SOURCE_HEIGHT;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(sourceImage, 0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
+      ctx.drawImage(baseImage.complete ? baseImage : sourceImage, 0, 0, SOURCE_WIDTH, SOURCE_HEIGHT);
+      applyBackgroundTheme(ctx, backgroundInput.value);
 
       const name = document.getElementById('nameInput').value.trim().toUpperCase();
       const position = document.getElementById('positionInput').value.trim().toUpperCase();
       const office = document.getElementById('officeInput').value.trim();
       const cell = document.getElementById('cellInput').value.trim();
       const email = document.getElementById('emailInput').value.trim();
+
+      if (!includeEdits) return canvas;
 
       if (name !== defaults.name) {
         paintMask(ctx, 622, 105, 725, 105);
@@ -441,6 +498,11 @@
       return canvas;
     };
 
+    const refreshPreviewImage = () => {
+      if (!baseImage.complete) return;
+      sourceImage.src = renderSignatureCanvas(false).toDataURL('image/png');
+    };
+
     const sliceData = (canvas, rect, scaleFactor) => {
       const out = document.createElement('canvas');
       out.width = Math.max(1, Math.round(rect.w * scaleFactor));
@@ -455,28 +517,32 @@
     const buildCopyHtml = () => {
       const s = Number(scale.value);
       const canvas = renderSignatureCanvas();
-      const rows = [
-        [{ x: 0, y: 0, w: 2172, h: 70 }],
-        [{ x: 0, y: 70, w: 1480, h: 80 }, { x: 1480, y: 70, w: 515, h: 80, href: document.getElementById('officeLink').href }, { x: 1995, y: 70, w: 177, h: 80 }],
-        [{ x: 0, y: 150, w: 1480, h: 94 }, { x: 1480, y: 150, w: 515, h: 94, href: document.getElementById('cellLink').href }, { x: 1995, y: 150, w: 177, h: 94 }],
-        [{ x: 0, y: 244, w: 1480, h: 82 }, { x: 1480, y: 244, w: 550, h: 82, href: document.getElementById('emailLink').href }, { x: 2030, y: 244, w: 142, h: 82 }],
-        [{ x: 0, y: 326, w: 1476, h: 81 }, { x: 1476, y: 326, w: 492, h: 81, href: 'https://www.SaniXperts.ca' }, { x: 1968, y: 326, w: 204, h: 81 }],
-        [{ x: 0, y: 407, w: 1478, h: 112 }, { x: 1478, y: 407, w: 610, h: 112, href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4' }, { x: 2088, y: 407, w: 84, h: 112 }],
-        [{ x: 0, y: 519, w: 2172, h: 205 }]
+      const xCuts = [0, 1476, 1478, 1480, 1968, 1995, 2030, 2088, 2172];
+      const yCuts = [0, 70, 150, 244, 326, 407, 519, 724];
+      const links = [
+        { x1: 1480, x2: 1995, y1: 70, y2: 150, href: document.getElementById('officeLink').href },
+        { x1: 1480, x2: 1995, y1: 150, y2: 244, href: document.getElementById('cellLink').href },
+        { x1: 1480, x2: 2030, y1: 244, y2: 326, href: document.getElementById('emailLink').href },
+        { x1: 1476, x2: 1968, y1: 326, y2: 407, href: 'https://www.SaniXperts.ca' },
+        { x1: 1478, x2: 2088, y1: 407, y2: 519, href: 'https://www.google.com/maps/search/?api=1&query=301-1882%20Upper%20James%20St.%20Hamilton%2C%20ON%20L9B%201K4' }
       ];
-
-      const tableWidth = Math.round(SOURCE_WIDTH * s);
-      const tableRows = rows.map(row => {
-        const cells = row.map(rect => {
+      const colWidths = xCuts.slice(0, -1).map((x, index) => Math.max(1, Math.round((xCuts[index + 1] - x) * s)));
+      const tableWidth = colWidths.reduce((sum, width) => sum + width, 0);
+      const colGroup = colWidths.map(width => `<col style="width:${width}px;">`).join('');
+      const tableRows = yCuts.slice(0, -1).map((y, rowIndex) => {
+        const rowHeight = yCuts[rowIndex + 1] - y;
+        const cells = xCuts.slice(0, -1).map((x, colIndex) => {
+          const rect = { x, y, w: xCuts[colIndex + 1] - x, h: rowHeight };
+          const href = links.find(item => x >= item.x1 && xCuts[colIndex + 1] <= item.x2 && y >= item.y1 && yCuts[rowIndex + 1] <= item.y2)?.href;
           const part = sliceData(canvas, rect, s);
           const image = imgTag(part);
-          const body = rect.href ? link(rect.href, image) : image;
-          return `<td style="padding:0;margin:0;border:0;line-height:0;font-size:0;">${body}</td>`;
+          const body = href ? link(href, image) : image;
+          return `<td width="${part.width}" height="${part.height}" style="width:${part.width}px;height:${part.height}px;padding:0;margin:0;border:0;line-height:0;font-size:0;mso-line-height-rule:exactly;">${body}</td>`;
         }).join('');
-        return `<tr>${cells}</tr>`;
+        return `<tr style="height:${Math.max(1, Math.round(rowHeight * s))}px;">${cells}</tr>`;
       }).join('');
 
-      return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-spacing:0;width:${tableWidth}px;max-width:100%;"><tbody>${tableRows}</tbody></table>`;
+      return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${tableWidth}" style="border-collapse:collapse;border-spacing:0;table-layout:fixed;width:${tableWidth}px;max-width:100%;mso-table-lspace:0pt;mso-table-rspace:0pt;"><colgroup>${colGroup}</colgroup><tbody>${tableRows}</tbody></table>`;
     };
 
     document.getElementById('copySignature').addEventListener('click', async () => {
@@ -495,6 +561,8 @@
         status.textContent = 'Copy blocked by browser; select the signature preview and copy manually';
       }
     });
+    backgroundInput.addEventListener('change', refreshPreviewImage);
+    baseImage.addEventListener('load', refreshPreviewImage, { once: true });
   </script>
 </body>
 </html>
