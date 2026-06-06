@@ -230,7 +230,7 @@
     </section>
 
     <section class="chooser" aria-label="Template choices">
-      <button class="template-card" type="button" data-template="vince" aria-pressed="true">
+      <button class="template-card" type="button" data-template="vince" aria-pressed="false">
         <span class="swatch"></span>
         <strong>Vince Template 1</strong>
         <span>Existing Vince Yako signature.</span>
@@ -245,7 +245,7 @@
         <strong>Haron Template 3</strong>
         <span>Alternate Haron Toma signature artwork.</span>
       </button>
-      <button class="template-card" type="button" data-template="vince4" aria-pressed="false">
+      <button class="template-card" type="button" data-template="vince4" aria-pressed="true">
         <span class="swatch"></span>
         <strong>Vince Template 4</strong>
         <span>White Vince Yako signature artwork.</span>
@@ -264,8 +264,8 @@
 
     <section class="panel preview-panel" aria-label="Selected signature preview">
       <div class="preview-title">
-        <h2 id="templateTitle">Vince Template 1</h2>
-        <span id="templateHint">Template 1 of 6</span>
+        <h2 id="templateTitle">Vince Template 4</h2>
+        <span id="templateHint">Template 4 of 5</span>
       </div>
       <div class="signature-stage" id="signaturePreview"></div>
     </section>
@@ -379,7 +379,7 @@
       }
     };
 
-    let selectedTemplate = 'vince';
+    let selectedTemplate = 'vince4';
 
     const scaleInput = document.getElementById('scaleInput');
     const scaleFactor = () => Number(scaleInput.value) / 100;
