@@ -230,7 +230,7 @@
     </section>
 
     <section class="chooser" aria-label="Template choices">
-      <button class="template-card" type="button" data-template="vince" aria-pressed="true">
+      <button class="template-card" type="button" data-template="vince" aria-pressed="false">
         <span class="swatch"></span>
         <strong>Vince Template 1</strong>
         <span>Existing Vince Yako signature.</span>
@@ -245,10 +245,10 @@
         <strong>Haron Template 3</strong>
         <span>Alternate Haron Toma signature artwork.</span>
       </button>
-      <button class="template-card" type="button" data-template="vince4" aria-pressed="false">
+      <button class="template-card" type="button" data-template="vince4" aria-pressed="true">
         <span class="swatch"></span>
-        <strong>Vince Template 4</strong>
-        <span>White Vince Yako signature artwork.</span>
+        <strong>Vince Template 5</strong>
+        <span>Copy of Vince Template 4.</span>
       </button>
       <button class="template-card" type="button" data-template="haron5" aria-pressed="false">
         <span class="swatch"></span>
@@ -264,8 +264,8 @@
 
     <section class="panel preview-panel" aria-label="Selected signature preview">
       <div class="preview-title">
-        <h2 id="templateTitle">Vince Template 1</h2>
-        <span id="templateHint">Template 1 of 6</span>
+        <h2 id="templateTitle">Vince Template 5</h2>
+        <span id="templateHint">Copy of Template 4</span>
       </div>
       <div class="signature-stage" id="signaturePreview"></div>
     </section>
@@ -332,8 +332,8 @@
         ]
       },
       vince4: {
-        title: 'Vince Template 4',
-        hint: 'Template 4 of 6',
+        title: 'Vince Template 5',
+        hint: 'Copy of Template 4',
         src: 'https://res.cloudinary.com/dydim1luz/image/upload/v1780385961/ChatGPT_Image_Jun_2_2026_03_39_12_AM_oy9pyz.png',
         alt: 'Vince Yako, Manager, SaniXperts Inc.',
         mapName: 'vince-template-4-map',
@@ -379,7 +379,7 @@
       }
     };
 
-    let selectedTemplate = 'vince';
+    let selectedTemplate = 'vince4';
 
     const scaleInput = document.getElementById('scaleInput');
     const scaleFactor = () => Number(scaleInput.value) / 100;
