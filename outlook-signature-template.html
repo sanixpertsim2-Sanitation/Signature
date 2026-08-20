@@ -578,21 +578,32 @@
       email:"yahya@sanixperts.ca", showAddr:true };
   }
 
+  /* ---------------- critical render — runs first, before any wiring below,
+     so a bug in the wiring can never leave the logo/preview blank again ---------------- */
+  document.getElementById("topLogo").src = LOGO_DISPLAY;
+  buildTemplateCards();
+  render();
+
+  /* ---------------- interactive wiring — guarded so one missing/renamed
+     element can't throw and take the rest of the page down with it ---------------- */
+  function on(id, evt, fn){
+    var el = document.getElementById(id);
+    if(el) el.addEventListener(evt, fn); else console.warn("Signature Studio: #"+id+" not found — skipped wiring "+evt);
+  }
+
   /* email auto-suggest from first name */
   var emailEdited=false;
-  document.getElementById("f-email").addEventListener("input",function(){emailEdited=true;});
-  document.getElementById("f-name").addEventListener("input",function(){
+  on("f-email","input",function(){emailEdited=true;});
+  on("f-name","input",function(){
     if(!emailEdited){
       var first=(this.value.trim().split(/\s+/)[0]||"").toLowerCase().replace(/[^a-z]/g,"");
       if(first) document.getElementById("f-email").value = first+"@sanixperts.ca";
     }
   });
 
-  /* live updates */
-  ["f-name","f-title","f-mobile","f-office","f-email","f-address"].forEach(function(id){
-    document.getElementById(id).addEventListener("input", render);
-  });
-  document.getElementById("f-showaddr").addEventListener("change", render);
+  /* live updates — only fields that actually exist as inputs */
+  ["f-name","f-title","f-mobile","f-email"].forEach(function(id){ on(id,"input",render); });
+  on("f-showaddr","change", render);
 
   /* ---------------- copy / export ---------------- */
   function toast(msg){
@@ -631,14 +642,14 @@
 
   function openSource(){ document.getElementById("srcWrap").classList.add("open"); }
 
-  document.getElementById("btnCopy").addEventListener("click", copyRich);
+  on("btnCopy","click", copyRich);
 
-  document.getElementById("btnSrc").addEventListener("click", function(){
+  on("btnSrc","click", function(){
     var w=document.getElementById("srcWrap"); w.classList.toggle("open");
     if(w.classList.contains("open")){ document.getElementById("srcBox").focus(); document.getElementById("srcBox").select(); }
   });
 
-  document.getElementById("btnHtm").addEventListener("click", function(){
+  on("btnHtm","click", function(){
     var d=readForm();
     var file = fullDocument(buildHTML(false));
     var blob=new Blob([file],{type:"text/html"});
@@ -653,16 +664,11 @@
 
   /* theme toggle */
   var root=document.documentElement;
-  document.getElementById("themeBtn").addEventListener("click",function(){
+  on("themeBtn","click",function(){
     var now=root.getAttribute("data-theme");
     var next = now==="dark" ? "light" : (now==="light" ? "dark" :
       (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "light":"dark"));
     root.setAttribute("data-theme", next);
   });
-
-  /* init */
-  document.getElementById("topLogo").src = LOGO_DISPLAY;
-  buildTemplateCards();
-  render();
 })();
 </script>
