@@ -397,22 +397,34 @@
     return '<span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:bold;'
       + 'letter-spacing:.6px;color:'+C.blue+';text-transform:uppercase;">'+esc(t)+'</span>';
   }
-  function val(html){
-    return '<span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:'+C.ink+';">'+html+'</span>';
-  }
   function link(href,text,color){
     return '<a href="'+href+'" style="color:'+(color||C.ink)+';text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-size:13px;">'+esc(text)+'</a>';
   }
 
-  /* contact rows shared by templates: returns array of {label, valueHtml} */
+  /* Contact rows shared by templates -- deliberately Mobile/Office/Email/Web
+     ONLY, every one a guaranteed single line, so label and value stay
+     pixel-aligned in every row. The postal address is long enough to wrap to
+     two lines (confirmed: it does, at every template's column width), which
+     would misalign a caption sitting at the TOP of a two-line value against
+     the single-line rows around it. Address is rendered separately by each
+     template as its own full-width line below the aligned grid instead --
+     see addressLine(). */
   function contacts(d){
     var rows=[];
     if(d.mobile) rows.push([ "Mobile", link(telHref(d.mobile), d.mobile) ]);
     rows.push([ "Office", link(telHref(BRAND.office), BRAND.office) ]);
     if(d.email)  rows.push([ "Email",  link("mailto:"+d.email, d.email, C.deep) ]);
     rows.push([ "Web", link(BRAND.websiteHref, BRAND.website, C.deep) ]);
-    if(d.showAddr) rows.push([ "Address", val(esc(BRAND.address)) ]);
     return rows;
+  }
+
+  /* the office address as its own line -- a thin top divider + muted small
+     text, never squeezed into the aligned contact grid (see contacts() note) */
+  function addressLine(d, width){
+    if(!d.showAddr) return "";
+    return '<div style="margin-top:12px;padding-top:10px;border-top:1px solid '+C.line+';'
+      + 'width:'+(width-2)+'px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:'+C.muted+';line-height:1.5;">'
+      + esc(BRAND.address) + '</div>';
   }
 
   function logoCell(size){
@@ -463,6 +475,7 @@
     +      '<table role="presentation" cellpadding="0" cellspacing="0" border="0">'+cRows+'</table>'
     +    '</td>'
     +  '</tr></table>'
+    +  addressLine(d, W - 44)
     +'</td></tr>'
     +'<tr><td style="font-size:0;line-height:0;">'+valueBar(W)+'</td></tr>'
     +'</table>';
@@ -487,7 +500,7 @@
     +        (d.title?'<span style="font-size:12px;font-weight:normal;color:'+C.muted+';letter-spacing:0;">&nbsp;&nbsp;'+esc(d.title)+'</span>':'')+'</div>'
     +      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:'+C.blue+';letter-spacing:2px;padding:3px 0 8px;">'+esc(BRAND.companyMark)+'</div>'
     +      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:'+C.ink+';line-height:1.4;">'+contactLine+'</div>'
-    +      (d.showAddr?'<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:'+C.muted+';padding-top:6px;">'+esc(BRAND.address)+'</div>':'')
+    +      (d.showAddr?'<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:'+C.muted+';padding-top:6px;line-height:1.5;">'+esc(BRAND.address)+'</div>':'')
     +    '</td>'
     +  '</tr></table>'
     +'</td></tr></table>';
@@ -516,6 +529,9 @@
     +'<tr><td style="padding:14px 24px 0;"><div style="height:1px;background-color:'+C.line+';font-size:0;line-height:0;">&nbsp;</div></td></tr>'
     +'<tr><td style="padding:14px 24px 20px;">'
     +   '<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>'+cells+'</tr></table>'
+    +   (d.showAddr ? '<div style="margin-top:14px;padding-top:10px;border-top:1px solid '+C.line+';'
+        + 'font-family:Arial,Helvetica,sans-serif;font-size:11px;color:'+C.muted+';line-height:1.5;">'
+        + esc(BRAND.address) + '</div>' : '')
     +'</td></tr>'
     +'<tr><td style="font-size:0;line-height:0;">'+valueBar(W)+'</td></tr>'
     +'</table>';
