@@ -385,7 +385,10 @@
   /* Signature palette — literal hex only (email clients ignore CSS vars) */
   var C = {
     blue:"#1479C0", deep:"#0E5A96", ink:"#12314F", name:"#0E2942",
-    muted:"#5B6B7A", line:"#D8E0E8", navy:"#0E2E52", chip:"#BFE0F5", white:"#FFFFFF"
+    muted:"#5B6B7A", line:"#D8E0E8", navy:"#0E2E52", chip:"#BFE0F5", white:"#FFFFFF",
+    /* on-navy caption/label colour -- measured 6.74:1 against navy (needs 4.5:1
+       for small text), distinct from white so labels read as secondary to values */
+    navyLabel:"#63C0EF"
   };
 
   function esc(s){ return String(s==null?"":s)
@@ -436,7 +439,7 @@
   /* value-prop navy bar (Classic + Modern) — solid navy for Outlook */
   function valueBar(width){
     var chips = BRAND.chips.map(function(c,i){
-      return (i? '<span style="color:'+C.blue+';padding:0 8px;">&#8226;</span>':'')
+      return (i? '<span style="color:'+C.chip+';padding:0 8px;">&#8226;</span>':'')
         + '<span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:'+C.white+';letter-spacing:.3px;">'+esc(c)+'</span>';
     }).join("");
     return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="'+width+'" '
@@ -537,14 +540,73 @@
     +'</table>';
   }
 
+  /* ---------- TEMPLATE 4 : NAVY PREMIUM (full dark card) ----------
+     The one genuinely different direction: a solid navy surface top to
+     bottom instead of a white card with a navy footer. Contrast-checked,
+     not guessed -- labels use C.navyLabel (6.74:1 on navy), values/name use
+     white (13.71:1), the chip separator uses C.chip (9.92:1). Single accent
+     hue throughout (no gold/second accent), one radius value, no gradients
+     or glow -- premium through restraint, not decoration. */
+  function tplNavy(d){
+    var W=600;
+    /* same data as contacts(), but rendered with white links (navy surface
+       needs white values, not the white-card ink/deep-blue link colours) */
+    var navyRows=[];
+    if(d.mobile) navyRows.push(["Mobile", link(telHref(d.mobile), d.mobile, C.white)]);
+    navyRows.push(["Office", link(telHref(BRAND.office), BRAND.office, C.white)]);
+    if(d.email)  navyRows.push(["Email",  link("mailto:"+d.email, d.email, C.white)]);
+    navyRows.push(["Web", link(BRAND.websiteHref, BRAND.website, C.white)]);
+    var cRows = navyRows.map(function(r){
+      return '<tr>'
+        + '<td valign="top" style="padding:4px 0;">'
+        +   '<span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:bold;letter-spacing:.6px;color:'+C.navyLabel+';text-transform:uppercase;">'+esc(r[0])+'</span>'
+        + '</td>'
+        + '<td valign="top" style="padding:4px 0 4px 8px;">'+r[1]+'</td>'
+      + '</tr>';
+    }).join("");
+
+    var chips = BRAND.chips.map(function(c,i){
+      return (i? '<span style="color:'+C.chip+';padding:0 8px;">&#8226;</span>':'')
+        + '<span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:'+C.navyLabel+';letter-spacing:.3px;">'+esc(c)+'</span>';
+    }).join("");
+
+    return ''
+    +'<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="'+W+'" style="width:'+W+'px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;background-color:'+C.navy+';border-radius:8px;">'
+    +'<tr><td style="padding:22px 24px 18px;background-color:'+C.navy+';border-radius:8px 8px 0 0;">'
+    +  '<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>'
+    +    '<td valign="middle" width="106" style="padding-right:18px;">'+logoCell(88)+'</td>'
+    +    '<td valign="middle" width="1" style="border-left:1px solid rgba(255,255,255,.18);">&nbsp;</td>'
+    +    '<td valign="middle" style="padding-left:20px;padding-right:16px;">'
+    +      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;color:'+C.white+';letter-spacing:.5px;line-height:1.15;">'+esc(d.name||"")+'</div>'
+    +      (d.title?'<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:'+C.navyLabel+';letter-spacing:2px;text-transform:uppercase;padding-top:5px;">'+esc(d.title)+'</div>':'')
+    +      '<div style="width:36px;height:2px;background-color:'+C.chip+';margin:10px 0;font-size:0;line-height:0;">&nbsp;</div>'
+    +      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;color:'+C.white+';letter-spacing:2.5px;">'+esc(BRAND.companyMark)+'</div>'
+    +    '</td>'
+    +    '<td valign="middle" style="padding-left:14px;border-left:1px solid rgba(255,255,255,.18);">'
+    +      '<table role="presentation" cellpadding="0" cellspacing="0" border="0">'+cRows+'</table>'
+    +    '</td>'
+    +  '</tr></table>'
+    +'</td></tr>'
+    +'<tr><td style="padding:0 24px;"><div style="height:1px;background-color:rgba(255,255,255,.14);font-size:0;line-height:0;">&nbsp;</div></td></tr>'
+    +'<tr><td style="padding:14px 24px '+(d.showAddr?'6px':'20px')+';">'
+    +   '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>'
+    +   '<td align="left" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:'+C.white+';letter-spacing:.3px;">'+esc(BRAND.tagline)+'</td>'
+    +   '<td align="right" style="white-space:nowrap;">'+chips+'</td>'
+    +   '</tr></table>'
+    +'</td></tr>'
+    + (d.showAddr ? '<tr><td style="padding:0 24px 20px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:'+C.navyLabel+';line-height:1.5;">'+esc(BRAND.address)+'</td></tr>' : '')
+    +'</table>';
+  }
+
   var TEMPLATES = [
-    { id:"classic", name:"Classic", desc:"Logo · name · contacts, with value bar", fn:tplClassic },
-    { id:"compact", name:"Compact", desc:"Tight one-line — ideal for replies", fn:tplCompact },
-    { id:"modern",  name:"Modern Stacked", desc:"Name on top, contacts in a clean row", fn:tplModern }
+    { id:"navy",    name:"Navy Premium", desc:"Full dark card — matches the original brand-card mood, rebuilt clean", fn:tplNavy },
+    { id:"classic", name:"Classic", desc:"White card · logo · name · contacts, with a navy value bar", fn:tplClassic },
+    { id:"modern",  name:"Modern Stacked", desc:"White card · name on top, contacts in a clean row", fn:tplModern },
+    { id:"compact", name:"Compact", desc:"Tight one-line — ideal for replies", fn:tplCompact }
   ];
 
   /* ---------------- state + wiring ---------------- */
-  var state = { tpl:"classic" };
+  var state = { tpl:"navy" };
   function readForm(){
     return {
       name: v("f-name"), title: v("f-title"), mobile: v("f-mobile"),
