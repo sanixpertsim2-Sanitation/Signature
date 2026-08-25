@@ -10,7 +10,7 @@ locked, hosted file** and everything else is real HTML text.
 - `example-01-classic.htm` ... sample output, Classic layout
 - `example-02-compact.htm` ... sample output, Compact layout (great for replies)
 - `example-03-modern.htm` .... sample output, Modern Stacked layout
-- `sanixperts-logo.png` ...... crisp 480px logo (optional — see "Sharper logo" below)
+- `assets/sanixperts-symbol-curved-wordmark-white.png` ... approved canonical logo
 
 ## What's locked vs editable
 - **Locked for everyone:** logo, "SaniXperts Inc.", website, office phone (289-674-7265),
@@ -18,22 +18,13 @@ locked, hosted file** and everything else is real HTML text.
 - **Per employee:** name, job title, mobile, email.
 
 ## The logo
-The signature points at the company's own hosted logo:
-`https://sanixperts.ca/wp-content/uploads/2020/05/logo.png`
-Because every signature references that one URL, no one can ever end up with a different
-version — this is the core of the fix.
-
-### Sharper logo (optional)
-That official file is 166px. For extra crispness on high-DPI screens, host the included
-`sanixperts-logo.png` (480px) on your GitHub Pages repo and change one line near the top of
-`index.html`:
-```
-var LOGO_HOSTED = "https://sanixpertsim2-sanitation.github.io/Signature/sanixperts-logo.png";
-```
+Every generated signature uses the approved curved-wordmark asset from this repository:
+`https://sanixpertsim2-sanitation.github.io/Signature/assets/sanixperts-symbol-curved-wordmark-white.png`
+The symbol and curved SANIXPERTS wordmark therefore stay consistent for every employee.
 
 ## Hosting on GitHub Pages
-1. Put `index.html` (and optionally `sanixperts-logo.png`) in the repo.
-2. Employees open the page, fill in their 4 fields, pick a layout, click **Copy signature**.
+1. Keep `index.html` and the `assets` folder together in the repo.
+2. Employees open the page, fill in their fields, pick a layout and size, then click **Copy to Outlook**.
 3. Paste into Outlook: `File ▸ Options ▸ Mail ▸ Signatures ▸ New ▸ paste ▸ Save`.
 
 ## Outlook compatibility
